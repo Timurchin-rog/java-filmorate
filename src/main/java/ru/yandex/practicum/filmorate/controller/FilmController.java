@@ -30,8 +30,9 @@ public class FilmController {
     public Film create(@Valid @RequestBody Film film) {
         checkValidation(film);
         film.setId(getNextId());
+        log.info(String.format("Валидация нового фильма id = %d пройдена", film.getId()));
         films.put(film.getId(), film);
-        log.info("Новый фильм добавлен");
+        log.info(String.format("Новый фильм id = %d добавлен", film.getId()));
         return film;
     }
 
@@ -42,11 +43,12 @@ public class FilmController {
         }
         if (films.get(film.getId()) != null) {
             checkValidation(film);
+            log.info(String.format("Валидация обновлённого фильма id = %d пройдена", film.getId()));
             films.put(film.getId(), film);
-            log.info("Неактуальный фильм заменен");
+            log.info(String.format("Фильм id = %d обновлён", film.getId()));
             return film;
         } else {
-            throw new NotFoundException(String.format("Фильм с id = %d не найден", film.getId()));
+            throw new NotFoundException(String.format("Фильм id = %d не найден", film.getId()));
         }
     }
 
@@ -62,7 +64,8 @@ public class FilmController {
     private void checkValidation(Film film) {
         if (film.getDescription().length() > 200) {
             throw new ValidationException("Максимальная длина описания — 200 символов");
-        } else if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        }
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
     }

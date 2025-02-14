@@ -30,10 +30,10 @@ public class UserController {
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         checkValidation(user);
-        log.info("Валидация нового пользователя пройдена");
         user.setId(getNextId());
+        log.info(String.format("Валидация нового пользователя id = %d пройдена", user.getId()));
         users.put(user.getId(), user);
-        log.info("Новый пользователь добавлен");
+        log.info(String.format("Новый пользователь id = %d добавлен", user.getId()));
         return user;
     }
 
@@ -44,12 +44,12 @@ public class UserController {
         }
         if (users.get(user.getId()) != null) {
             checkValidation(user);
-            log.info("Валидация при обновлении пользователя пройдена");
+            log.info(String.format("Валидация обновлённого пользователя id = %d пройдена", user.getId()));
             users.put(user.getId(), user);
-            log.info("Неактуальный пользователь заменен");
+            log.info(String.format("Пользователь id = %d обновлён", user.getId()));
             return user;
         } else {
-            throw new NotFoundException(String.format("Пользователь с id = %d не найден", user.getId()));
+            throw new NotFoundException(String.format("Пользователь id = %d не найден", user.getId()));
         }
     }
 
@@ -65,9 +65,11 @@ public class UserController {
     private void checkValidation(User user) {
         if (user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может содержать пробелы");
-        } else if (user.getName() == null) {
+        }
+        if (user.getName() == null) {
             user.setName(user.getLogin());
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
     }
