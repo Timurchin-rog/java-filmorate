@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,15 +13,13 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Film {
+public class User {
     Long id;
+    @Email
+    String email;
     @NotBlank
+    String login;
     String name;
-    @NotBlank
-    String description;
     @NotNull
-    LocalDate releaseDate;
-    @NotNull
-    @Positive
-    Integer duration;
+    LocalDate birthday;
 }
