@@ -1,76 +1,58 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.EmptyIdException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-
-    @Getter
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserService userService;
+    private final UserStorage userStorage;
 
     @GetMapping
-    public Collection<User> findAll() {
-        return users.values();
+    public Collection<User> findAllUsers() {
+        return userStorage.findAllUsers();
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        checkValidation(user);
-        user.setId(getNextId());
-        log.info(String.format("Валидация нового пользователя id = %d пройдена", user.getId()));
-        users.put(user.getId(), user);
-        log.info(String.format("Новый пользователь id = %d добавлен", user.getId()));
-        return user;
+    public User createUser(@RequestBody User user) {
+        return userStorage.createUser(user);
     }
 
-    @PutMapping
-    public User update(@Valid @RequestBody User user) {
-        if (user.getId() == null) {
-            throw new EmptyIdException("Id должен быть указан");
-        }
-        if (users.get(user.getId()) != null) {
-            checkValidation(user);
-            log.info(String.format("Валидация обновлённого пользователя id = %d пройдена", user.getId()));
-            users.put(user.getId(), user);
-            log.info(String.format("Пользователь id = %d обновлён", user.getId()));
-            return user;
-        } else {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", user.getId()));
-        }
+    @PutMapping("/{userId}")
+    public User updateUser(@PathVariable long userId, @RequestBody User newUser) {
+        return userStorage.updateUser(userId, newUser);
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @DeleteMapping("/{userId}")
+    public void removeUser(@PathVariable long userId) {
+        userStorage.removeUser(userId);
     }
 
-    private void checkValidation(User user) {
-        if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может содержать пробелы");
-        }
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
+    @PutMapping("/{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable long userId, @PathVariable long friendId) {
+        userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void removeFriend(@PathVariable long userId, @PathVariable long friendId) {
+        userService.removeFriend(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<User> findAllFriendsOfUser(@PathVariable long userId) {
+        return userService.findAllFriendsOfUser(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherUserId}")
+    public List<User> findCommonFriendsOfUsers(@PathVariable long userId, @PathVariable long otherUserId) {
+        return userService.findCommonFriendsOfUsers(userId, otherUserId);
     }
 }

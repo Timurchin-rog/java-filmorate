@@ -9,6 +9,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
@@ -16,12 +18,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
+@WebMvcTest(FilmController.class)
 @DisplayName("FilmController")
-class FilmControllerValidationTest {
+class FilmControllerTest {
 
     @MockBean
-    private FilmController filmController;
+    private InMemoryFilmStorage inMemoryFilmStorage;
+    @MockBean
+    private FilmService filmService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -29,9 +33,9 @@ class FilmControllerValidationTest {
     @Test
     @DisplayName("Должен бросать ValidationException при слишком ранней дате релиза")
     void shouldThrow_ValidationException_For_TooEarlyReleaseDate() {
-        Film film = new Film(1L, "Призрак оперы", "Романтика/мюзикл",
+        Film film = new Film("Призрак оперы", "Романтика/мюзикл",
                 LocalDate.of(1000, 12, 9), 143);
-        when(filmController.create(film)).thenReturn(film);
+        when(inMemoryFilmStorage.createFilm(film)).thenReturn(film);
 
         mockMvc.perform(post("/films")).andExpect(status().isBadRequest());
     }
@@ -40,9 +44,9 @@ class FilmControllerValidationTest {
     @Test
     @DisplayName("Не должен добавлять фильм с отрицательной продолжительностью")
     void shouldNotAdd_Film_With_NegativeDuration() {
-        Film film = new Film(1L, "Призрак оперы", "Романтика/мюзикл",
+        Film film = new Film("Призрак оперы", "Романтика/мюзикл",
                 LocalDate.of(2004, 12, 9), -143);
-        when(filmController.create(film)).thenReturn(film);
+        when(inMemoryFilmStorage.createFilm(film)).thenReturn(film);
 
         mockMvc.perform(post("/films")).andExpect(status().isBadRequest());
     }
