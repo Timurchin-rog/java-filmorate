@@ -37,7 +37,8 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    public User updateUser(long userId, User newUser) {
+    public User updateUser(User newUser) {
+        long userId = newUser.getId();
         if (users.get(userId) != null) {
             if (checkDublicatedEmail(newUser)) {
                 throw new ValidationException("Имейл уже используется");

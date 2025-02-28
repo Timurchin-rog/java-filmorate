@@ -26,9 +26,9 @@ public class FilmController {
         return filmStorage.createFilm(film);
     }
 
-    @PutMapping("/{filmId}")
-    public Film updateFilm(@PathVariable long filmId, @RequestBody Film newFilm) {
-        return filmStorage.updateFilm(filmId, newFilm);
+    @PutMapping()
+    public Film updateFilm(@RequestBody Film newFilm) {
+        return filmStorage.updateFilm(newFilm);
     }
 
     @DeleteMapping("/{filmId}")

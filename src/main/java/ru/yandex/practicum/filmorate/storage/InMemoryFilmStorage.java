@@ -31,7 +31,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public Film updateFilm(long filmId, Film newFilm) {
+    public Film updateFilm(Film newFilm) {
+        long filmId = newFilm.getId();
         if (films.get(filmId) != null) {
             checkValidation(newFilm);
             log.info(String.format("Валидация обновлённого фильма id = %d пройдена", filmId));

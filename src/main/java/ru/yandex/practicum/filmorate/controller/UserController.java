@@ -26,9 +26,9 @@ public class UserController {
         return userStorage.createUser(user);
     }
 
-    @PutMapping("/{userId}")
-    public User updateUser(@PathVariable long userId, @RequestBody User newUser) {
-        return userStorage.updateUser(userId, newUser);
+    @PutMapping()
+    public User updateUser(@RequestBody User newUser) {
+        return userStorage.updateUser(newUser);
     }
 
     @DeleteMapping("/{userId}")
