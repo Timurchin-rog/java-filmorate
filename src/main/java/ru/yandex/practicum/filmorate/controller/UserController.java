@@ -15,6 +15,8 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserStorage userStorage;
+    private final String pathFriends = "/{userId}/friends/{friendId}";
+    private final String pathFriend = "/{userId}/friends";
 
     @GetMapping
     public Collection<User> findAllUsers() {
@@ -36,22 +38,22 @@ public class UserController {
         userStorage.removeUser(userId);
     }
 
-    @PutMapping("/{userId}/friends/{friendId}")
+    @PutMapping(pathFriends)
     public void addFriend(@PathVariable long userId, @PathVariable long friendId) {
         userService.addFriend(userId, friendId);
     }
 
-    @DeleteMapping("/{userId}/friends/{friendId}")
+    @DeleteMapping(pathFriends)
     public void removeFriend(@PathVariable long userId, @PathVariable long friendId) {
         userService.removeFriend(userId, friendId);
     }
 
-    @GetMapping("/{userId}/friends")
+    @GetMapping(pathFriend)
     public List<User> findAllFriendsOfUser(@PathVariable long userId) {
         return userService.findAllFriendsOfUser(userId);
     }
 
-    @GetMapping("/{userId}/friends/common/{otherUserId}")
+    @GetMapping(pathFriend + "/common/{otherUserId}")
     public List<User> findCommonFriendsOfUsers(@PathVariable long userId, @PathVariable long otherUserId) {
         return userService.findCommonFriendsOfUsers(userId, otherUserId);
     }

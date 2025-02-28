@@ -15,6 +15,7 @@ import java.util.List;
 public class FilmController {
     private final FilmService filmService;
     private final FilmStorage filmStorage;
+    private final String pathLike = "/{filmId}/like/{userId}";
 
     @GetMapping
     public Collection<Film> findAllFilms() {
@@ -36,12 +37,12 @@ public class FilmController {
         filmStorage.removeFilm(filmId);
     }
 
-    @PutMapping("/{filmId}/like/{userId}")
+    @PutMapping(pathLike)
     public void addLike(@PathVariable long filmId, @PathVariable long userId) {
         filmService.addLike(filmId, userId);
     }
 
-    @DeleteMapping("/{filmId}/like/{userId}")
+    @DeleteMapping(pathLike)
     public void removeLike(@PathVariable long filmId, @PathVariable long userId) {
         filmService.removeLike(filmId, userId);
     }
