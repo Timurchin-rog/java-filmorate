@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Set;
 
 @Data
