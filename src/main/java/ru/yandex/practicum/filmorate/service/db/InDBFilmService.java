@@ -143,10 +143,10 @@ public class InDBFilmService implements FilmService {
                 .id(filmDB.getId())
                 .name(filmDB.getName())
                 .description(filmDB.getDescription())
-                .releaseDate(filmDB.getRelease_date())
+                .releaseDate(filmDB.getReleaseDate())
                 .duration(filmDB.getDuration())
                 .likes(filmRepository.getLikesId(filmDB.getId()))
-                .countLikes(filmDB.getCount_likes())
+                .countLikes(filmDB.getCountLikes())
                 .genres(genreRepository.getGenresOfFilm(filmDB.getId()))
                 .build();
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)

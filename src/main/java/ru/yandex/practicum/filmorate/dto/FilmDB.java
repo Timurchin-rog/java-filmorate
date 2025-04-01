@@ -16,10 +16,10 @@ public class FilmDB {
     Integer id;
     String name;
     String description;
-    Date release_date;
+    Date releaseDate;
     Integer duration;
     Set<Integer> likes;
-    int count_likes;
+    int countLikes;
     List<Integer> genres;
     Integer mpa;
 }

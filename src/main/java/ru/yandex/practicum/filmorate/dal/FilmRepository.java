@@ -61,9 +61,9 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 INSERT_FILM,
                 filmDB.getName(),
                 filmDB.getDescription(),
-                filmDB.getRelease_date(),
+                filmDB.getReleaseDate(),
                 filmDB.getDuration(),
-                filmDB.getCount_likes()
+                filmDB.getCountLikes()
         );
         filmDB.setId(filmId);
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
@@ -75,7 +75,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 UPDATE_FILM,
                 filmDB.getName(),
                 filmDB.getDescription(),
-                filmDB.getRelease_date(),
+                filmDB.getReleaseDate(),
                 filmDB.getDuration(),
                 filmDB.getId()
         );
@@ -92,7 +92,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 userId
         );
         FilmDB filmDB = getFilmById(filmId);
-        int countLikes = filmDB.getCount_likes();
+        int countLikes = filmDB.getCountLikes();
         countLikes += 1;
         update("UPDATE films SET count_likes = ? WHERE id = ?",
                 countLikes,
@@ -106,7 +106,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 userId
         );
         FilmDB filmDB = getFilmById(filmId);
-        int countLikes = filmDB.getCount_likes();
+        int countLikes = filmDB.getCountLikes();
         if (countLikes > 0) {
             countLikes -= 1;
             update("UPDATE films SET count_likes = ? WHERE id = ?",

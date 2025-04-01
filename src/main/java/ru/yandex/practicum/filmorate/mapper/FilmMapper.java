@@ -16,9 +16,9 @@ public final class FilmMapper {
                 .id(film.getId())
                 .name(film.getName())
                 .description(film.getDescription())
-                .release_date(film.getReleaseDate())
+                .releaseDate(film.getReleaseDate())
                 .duration(film.getDuration())
-                .count_likes(film.getCountLikes())
+                .countLikes(film.getCountLikes())
                 .build();
         if (film.getMpa() != null)
             filmDB.setMpa(film.getMpa().getId());
@@ -53,7 +53,7 @@ public final class FilmMapper {
             film.setDescription(filmFromRequest.getDescription());
         }
         if (filmFromRequest.hasReleaseDate()) {
-            film.setRelease_date(filmFromRequest.getReleaseDate());
+            film.setReleaseDate(filmFromRequest.getReleaseDate());
         }
         if (filmFromRequest.hasDuration()) {
             film.setDuration(filmFromRequest.getDuration());

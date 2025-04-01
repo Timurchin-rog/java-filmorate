@@ -15,9 +15,9 @@ public class FilmRowMapper implements RowMapper<FilmDB> {
                 .id(resultSet.getInt("id"))
                 .name(resultSet.getString("name"))
                 .description(resultSet.getString("description"))
-                .release_date(resultSet.getDate("release_date"))
+                .releaseDate(resultSet.getDate("release_date"))
                 .duration(resultSet.getInt("duration"))
-                .count_likes(resultSet.getInt("count_likes"))
+                .countLikes(resultSet.getInt("count_likes"))
                 .mpa(resultSet.getInt("mpa"))
                 .build();
     }
