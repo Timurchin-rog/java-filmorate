@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,9 +11,9 @@ import java.time.Instant;
 import java.util.Set;
 
 @Data
-@Builder(toBuilder = true)
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class UserDB {
     Integer id;
     String email;
     String login;
@@ -21,25 +21,9 @@ public class User {
     Date birthday;
     Set<Integer> friends;
 
-    public boolean hasEmail() {
-        return ! (email == null || email.isBlank());
-    }
+    public static class UserDBBuilder {
 
-    public boolean hasLogin() {
-        return ! (login == null || login.isBlank());
-    }
-
-    public boolean hasName() {
-        return ! (name == null || name.isBlank());
-    }
-
-    public boolean hasBirthday() {
-        return ! (birthday == null);
-    }
-
-    public static class UserBuilder {
-
-        public User.UserBuilder email(String email) {
+        public UserDB.UserDBBuilder email(String email) {
             if (email.contains(" ")) {
                 throw new ValidationException("Имейл не должен содержать пробелы");
             }
@@ -50,7 +34,7 @@ public class User {
             return this;
         }
 
-        public User.UserBuilder login(String login) {
+        public UserDB.UserDBBuilder login(String login) {
             if (login == null || login.isBlank()) {
                 throw new ValidationException("Логин не может быть пустым");
             }
@@ -61,7 +45,7 @@ public class User {
             return this;
         }
 
-        public User.UserBuilder name(String name) {
+        public UserDB.UserDBBuilder name(String name) {
             if (name != null) {
                 this.name = name;
                 return this;
@@ -70,7 +54,7 @@ public class User {
             return this;
         }
 
-        public User.UserBuilder birthday(Date birthday) {
+        public UserDB.UserDBBuilder birthday(Date birthday) {
             if (birthday == null) {
                 throw new ValidationException("Дата рождения не может быть пустой");
             }
