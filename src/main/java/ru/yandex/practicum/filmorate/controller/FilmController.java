@@ -14,15 +14,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
-    private final String pathLike = "/{filmId}/like/{userId}";
+    private final String pathLike = "/{film-id}/like/{user-id}";
 
     @GetMapping
     public Collection<FilmDto> findAll() {
         return filmService.findAll();
     }
 
-    @GetMapping("/{filmId}")
-    public FilmDto findById(@PathVariable int filmId) {
+    @GetMapping("/{film-id}")
+    public FilmDto findById(@PathVariable(name = "film-id") int filmId) {
         return filmService.findById(filmId);
     }
 
@@ -36,18 +36,20 @@ public class FilmController {
         return filmService.update(film);
     }
 
-    @DeleteMapping("/{filmId}")
+    @DeleteMapping("/{film-id}")
     public void remove(@PathVariable int filmId) {
         filmService.remove(filmId);
     }
 
     @PutMapping(pathLike)
-    public void addLike(@PathVariable int filmId, @PathVariable int userId) {
+    public void addLike(@PathVariable(name = "film-id") int filmId,
+                        @PathVariable(name = "user-id") int userId) {
         filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping(pathLike)
-    public void removeLike(@PathVariable int filmId, @PathVariable int userId) {
+    public void removeLike(@PathVariable(name = "film-id") int filmId,
+                           @PathVariable(name = "user-id") int userId) {
         filmService.removeLike(filmId, userId);
     }
 
