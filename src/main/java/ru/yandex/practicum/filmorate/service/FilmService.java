@@ -31,4 +31,6 @@ public interface FilmService {
     List<MPA> findAllMPA();
 
     MPA findMPAById(int mpaId);
+
+    List<FilmDto> searchFilms(String query, String by);
 }

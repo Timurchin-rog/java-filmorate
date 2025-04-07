@@ -58,5 +58,9 @@ public class FilmController {
         return filmService.findPopularFilms(count);
     }
 
-
+    @GetMapping("/search")
+    public List<FilmDto> searchFilms(@RequestParam String query,
+                                     @RequestParam String by) {
+        return filmService.searchFilms(query, by);
+    }
 }

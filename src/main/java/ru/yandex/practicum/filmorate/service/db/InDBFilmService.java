@@ -16,10 +16,7 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,8 +52,8 @@ public class InDBFilmService implements FilmService {
             List<Genre> genres = filmFromRequest.getGenres();
             genresId = genres.stream()
 
-                            .map(Genre::getId)
-                            .collect(Collectors.toSet());
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
             genreRepository.isExistGenres(genresId);
         }
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
@@ -152,5 +149,17 @@ public class InDBFilmService implements FilmService {
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
             film.setMpa(mpaRepository.getMpaById(filmDB.getMpa()));
         return film;
+    }
+
+    @Override
+    public List<FilmDto> searchFilms(String query, String by) {
+        if (by.contains("title")) {
+            List<FilmDB> films = filmRepository.searchFilmsByTitle(query);
+            return films.stream()
+                    .map(this::mapToFilm)
+                    .map(FilmMapper::mapToFilmDto)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
