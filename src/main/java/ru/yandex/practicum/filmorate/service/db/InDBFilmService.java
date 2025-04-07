@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -41,7 +42,10 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public FilmDto findById(int filmId) {
-        FilmDB filmDB = filmRepository.getFilmById(filmId);
+        if (filmRepository.getFilmById(filmId).isEmpty())
+            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
+        FilmDB filmDB = filmRepository.getFilmById(filmId).get();
+        filmDB.setLikes(filmRepository.getLikesId(filmId));
         Film film = mapToFilm(filmDB);
         return FilmMapper.mapToFilmDto(film);
     }
@@ -74,7 +78,10 @@ public class InDBFilmService implements FilmService {
             throw new ValidationException("При обновлении фильма не указан id");
         }
         int filmId = filmFromRequest.getId();
-        FilmDB oldFilm = filmRepository.getFilmById(filmId);
+        if (filmRepository.getFilmById(filmId).isEmpty())
+            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
+        FilmDB oldFilm = filmRepository.getFilmById(filmId).get();
+        oldFilm.setLikes(filmRepository.getLikesId(filmId));
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
         Film film = mapToFilm(updatedOldFilm);
         FilmDB filmDB = FilmMapper.mapToFilmDB(film);
@@ -85,14 +92,18 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public String remove(int filmId) {
-        filmRepository.getFilmById(filmId);
+        if (filmRepository.getFilmById(filmId).isEmpty())
+            return String.format("Фильм id = %d не существует", filmId);
         filmRepository.removeFilm(filmId);
         return String.format("Фильм id = %d удалён", filmId);
     }
 
     @Override
     public void addLike(int filmId, int userId) {
-        FilmDB filmDB = filmRepository.getFilmById(filmId);
+        if (filmRepository.getFilmById(filmId).isEmpty())
+            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
+        FilmDB filmDB = filmRepository.getFilmById(filmId).get();
+        filmDB.setLikes(filmRepository.getLikesId(filmId));
         userService.findById(userId);
         filmRepository.addLike(filmId, userId);
         filmDB.getLikes().add(userId);
@@ -100,7 +111,10 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public void removeLike(int filmId, int userId) {
-        FilmDB filmDB = filmRepository.getFilmById(filmId);
+        if (filmRepository.getFilmById(filmId).isEmpty())
+            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
+        FilmDB filmDB = filmRepository.getFilmById(filmId).get();
+        filmDB.setLikes(filmRepository.getLikesId(filmId));
         userService.findById(userId);
         filmRepository.removeLike(filmId, userId);
         filmDB.getLikes().remove(userId);

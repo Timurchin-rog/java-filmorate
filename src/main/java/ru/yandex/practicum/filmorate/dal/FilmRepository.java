@@ -45,14 +45,8 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 .collect(Collectors.toList());
     }
 
-    public FilmDB getFilmById(int filmId) {
-        Optional<FilmDB> filmOpt = findOne("SELECT * FROM films WHERE id = ?", filmId);
-        if (filmOpt.isPresent()) {
-            filmOpt.get().setLikes(getLikesId(filmId));
-            return filmOpt.get();
-        } else {
-            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        }
+    public Optional<FilmDB> getFilmById(int filmId) {
+        return findOne("SELECT * FROM films WHERE id = ?", filmId);
     }
 
     public void saveFilm(FilmDB filmDB) {
@@ -92,7 +86,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 filmId,
                 userId
         );
-        FilmDB filmDB = getFilmById(filmId);
+        FilmDB filmDB = getFilmById(filmId).get();
         int countLikes = filmDB.getCountLikes();
         countLikes += 1;
         update("UPDATE films SET count_likes = ? WHERE id = ?",
@@ -106,7 +100,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 filmId,
                 userId
         );
-        FilmDB filmDB = getFilmById(filmId);
+        FilmDB filmDB = getFilmById(filmId).get();
         int countLikes = filmDB.getCountLikes();
         if (countLikes > 0) {
             countLikes -= 1;

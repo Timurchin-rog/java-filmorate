@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.UserDB;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -39,14 +38,8 @@ public class UserRepository extends BaseRepository<UserDB> {
                 .collect(Collectors.toList());
     }
 
-    public UserDB getUserById(int userId) {
-        Optional<UserDB> userOpt = findOne(FIND_USER_BY_ID, userId);
-        if (userOpt.isPresent()) {
-            userOpt.get().setFriends(getAllFriendOfUser(userId));
-            return userOpt.get();
-        } else {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        }
+    public Optional<UserDB> getUserById(int userId) {
+        return findOne(FIND_USER_BY_ID, userId);
     }
 
     public void saveUser(UserDB user) {
@@ -82,8 +75,6 @@ public class UserRepository extends BaseRepository<UserDB> {
                 userId,
                 friendId
         );
-        UserDB userDB = getUserById(userId);
-        userDB.setFriends(getAllFriendOfUser(userId));
     }
 
     public void removeFriend(int userId, int friendId) {
@@ -92,8 +83,6 @@ public class UserRepository extends BaseRepository<UserDB> {
                 userId,
                 friendId
         );
-        UserDB userDB = getUserById(userId);
-        userDB.setFriends(getAllFriendOfUser(userId));
     }
 
     public Set<Integer> getAllFriendOfUser(int userId) {
