@@ -108,11 +108,11 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public List<FilmDto> findPopularFilms(int count) {
-        List<FilmDB> filmsPopular = filmRepository.getPopularFilms(count);
-        if (filmsPopular.size() < count) {
-            count = filmsPopular.size();
+        List<FilmDB> films = filmRepository.getAllFilms();
+        if (films.size() < count) {
+            count = films.size();
         }
-        return filmsPopular.stream()
+        return films.stream()
                 .map(this::mapToFilm)
                 .map(FilmMapper::mapToFilmDto)
                 .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())

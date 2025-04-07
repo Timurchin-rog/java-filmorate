@@ -22,7 +22,7 @@ public class UserController {
         return userService.findAll();
     }
 
-    @GetMapping("/{user-Id}")
+    @GetMapping("/{user-id}")
     public UserDto findById(@PathVariable(name = "user-id") int userId) {
         return userService.findById(userId);
     }

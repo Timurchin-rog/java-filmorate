@@ -45,7 +45,7 @@ public class UserRepository extends BaseRepository<UserDB> {
             userOpt.get().setFriends(getAllFriendOfUser(userId));
             return userOpt.get();
         } else {
-            throw new NotFoundException(String.format("Фильм id = %d не найден", userId));
+            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
         }
     }
 
