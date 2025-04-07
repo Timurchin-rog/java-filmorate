@@ -23,7 +23,6 @@ public class Film {
     int countLikes;
     List<Genre> genres;
     MPA mpa;
-    List<Director> directors;
 
     public boolean hasName() {
         return ! (name == null || name.isBlank());

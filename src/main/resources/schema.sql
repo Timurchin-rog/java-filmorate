@@ -51,15 +51,3 @@ CREATE TABLE IF NOT EXISTS films_genres (
 	film_id integer REFERENCES films(id),
 	genre_id integer REFERENCES genres(id)
 );
-
-CREATE TABLE IF NOT EXISTS directors (
-	id integer PRIMARY KEY AUTO_INCREMENT,
-	name varchar(50)
-);
-
-CREATE TABLE IF NOT EXISTS films_directors (
-    id integer PRIMARY KEY AUTO_INCREMENT,
-	film_id integer REFERENCES films(id),
-	director_id integer REFERENCES directors(id)
-);
-
