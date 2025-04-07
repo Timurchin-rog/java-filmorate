@@ -14,7 +14,7 @@ public interface UserService {
 
     UserDto update(User user);
 
-    void remove(int userId);
+    String remove(int userId);
 
     void addFriend(int userId, int friendId);
 

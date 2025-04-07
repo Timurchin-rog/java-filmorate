@@ -16,7 +16,7 @@ public interface FilmService {
 
     FilmDto update(Film film);
 
-    void remove(int filmId);
+    String remove(int filmId);
 
     void addLike(int filmId, int userId);
 
