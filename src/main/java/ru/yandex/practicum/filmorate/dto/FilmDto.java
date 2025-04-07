@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 
@@ -27,5 +26,4 @@ public class FilmDto {
     int countLikes;
     List<Genre> genres;
     MPA mpa;
-    List<Director> directors;
 }

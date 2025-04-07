@@ -22,5 +22,4 @@ public class FilmDB {
     int countLikes;
     List<Integer> genres;
     Integer mpa;
-    List<Integer> directors;
 }
