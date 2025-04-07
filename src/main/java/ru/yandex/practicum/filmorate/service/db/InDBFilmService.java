@@ -57,10 +57,10 @@ public class InDBFilmService implements FilmService {
 
                             .map(Genre::getId)
                             .collect(Collectors.toSet());
-            genreRepository.isExistGenres(genresId);
+            genreRepository.checkGenres(genresId);
         }
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
-            mpaRepository.isExistMpa(filmDB.getMpa());
+            mpaRepository.checkMpa(filmDB.getMpa());
         filmRepository.saveFilm(filmDB);
         genreRepository.addGenres(filmDB.getId(), genresId);
         log.info(String.format("Новый фильм id = %d добавлен", filmDB.getId()));
