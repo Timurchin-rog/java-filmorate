@@ -144,7 +144,8 @@ public class InDBUserService implements UserService {
                     }
                     UserDB friend = userRepository.getUserById(friendId).get();
                     friend.setFriends(userRepository.getAllFriendOfUser(friendId));
-                    return friend;})
+                    return friend;
+                })
                 .map(this::mapToUser)
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
@@ -170,7 +171,8 @@ public class InDBUserService implements UserService {
                     }
                     UserDB friend = userRepository.getUserById(friendId).get();
                     friend.setFriends(userRepository.getAllFriendOfUser(friendId));
-                    return friend;})
+                    return friend;
+                })
                 .map(this::mapToUser)
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
