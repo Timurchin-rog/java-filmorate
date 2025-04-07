@@ -34,10 +34,4 @@ public class ErrorHandler {
     public Map<String, String> handleDuplicatedData(final DuplicatedDataException e) {
         return Map.of("Ошибка дублирования", e.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleJson(final JsonException e) {
-        return Map.of("Ошибка JSON", e.getMessage());
-    }
 }
