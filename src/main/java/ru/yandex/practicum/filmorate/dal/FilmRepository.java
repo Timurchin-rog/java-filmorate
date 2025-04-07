@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.Comparator;
 import java.util.List;
