@@ -29,6 +29,8 @@ public class FilmRepository extends BaseRepository<FilmDB> {
 
     private static final String DELETE_FILM = "DELETE FROM films WHERE id = ?";
     private static final String DELETE_LIKE_OF_FILM = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
+    private static final String DELETE_FILM_FROM_LIKES_LIST = "DELETE FROM films_likes WHERE film_id = ?";
+    private static final String DELETE_FILM_FROM_GENRES_LIST = "DELETE FROM films_genres WHERE film_id = ?";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<FilmDB> mapper, GenreRepository genreRepository) {
         super(jdbc, mapper);
@@ -80,6 +82,8 @@ public class FilmRepository extends BaseRepository<FilmDB> {
 
     public void removeFilm(int filmId) {
         delete(DELETE_FILM, filmId);
+        delete(DELETE_FILM_FROM_LIKES_LIST, filmId);
+        delete(DELETE_FILM_FROM_GENRES_LIST, filmId);
     }
 
     public void addLike(int filmId, int userId) {

@@ -24,6 +24,7 @@ public class UserRepository extends BaseRepository<UserDB> {
     private static final String INSERT_FRIEND_OF_USER = "INSERT INTO users_friends(user_id, friend_id) " +
             "VALUES (?, ?)";
     private static final String DELETE_FRIEND_OF_USER = "DELETE FROM users_friends WHERE user_id = ? AND friend_id = ?";
+    private static final String DELETE_USER_FROM_FRIENDS_LIST = "DELETE FROM users_friends WHERE user_id = ? OR friend_id = ?";
     private static final String FIND_ALL_FRIEND_OF_USER = "SELECT friend_id FROM users_friends WHERE user_id = ?";
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<UserDB> mapper) {
@@ -72,6 +73,7 @@ public class UserRepository extends BaseRepository<UserDB> {
 
     public void removeUser(int userId) {
         delete(DELETE_USER, userId);
+        delete(DELETE_USER_FROM_FRIENDS_LIST, userId, userId);
     }
 
     public void addFriend(int userId, int friendId) {
