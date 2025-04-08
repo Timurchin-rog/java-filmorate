@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 @Repository
 public class FilmRepository extends BaseRepository<FilmDB> {
     private final GenreRepository genreRepository;
-    private static final String FIND_ALL_FILMS = "SELECT * FROM films";
-    private static final String FIND_FILM_BY_ID = "SELECT * FROM films WHERE id = ?";
     private static final String FIND_POPULAR_FILMS = "SELECT * FROM films ORDER BY count_likes DESC LIMIT ?";
     private static final String FIND_LIKES = "SELECT user_id FROM films_likes WHERE film_id = ?";
 
@@ -27,10 +25,12 @@ public class FilmRepository extends BaseRepository<FilmDB> {
 
     private static final String UPDATE_FILM = "UPDATE films SET name = ?, description = ?, release_date = ?, " +
             "duration = ? WHERE id = ?";
-
     private static final String UPDATE_MPA_FILM = "UPDATE films SET mpa = ? WHERE id = ?";
+
     private static final String DELETE_FILM = "DELETE FROM films WHERE id = ?";
     private static final String DELETE_LIKE_OF_FILM = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
+    private static final String DELETE_FILM_FROM_LIKES_LIST = "DELETE FROM films_likes WHERE film_id = ?";
+    private static final String DELETE_FILM_FROM_GENRES_LIST = "DELETE FROM films_genres WHERE film_id = ?";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<FilmDB> mapper, GenreRepository genreRepository) {
         super(jdbc, mapper);
@@ -38,7 +38,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     }
 
     public List<FilmDB> getAllFilms() {
-        List<FilmDB> filmDBList = findMany(FIND_ALL_FILMS);
+        List<FilmDB> filmDBList = findMany("SELECT * FROM films");
         return filmDBList.stream()
                 .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
                 .sorted(Comparator.comparing(FilmDB::getId))
@@ -46,15 +46,12 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     }
 
     public FilmDB getFilmById(int filmId) {
-        Optional<FilmDB> filmOpt = findOne(FIND_FILM_BY_ID, filmId);
-        if (filmOpt.isPresent()) {
-            filmOpt.get().setLikes(getLikesId(filmId));
-            return filmOpt.get();
-        } else {
+        Optional<FilmDB> filmOpt = findOne("SELECT * FROM films WHERE id = ?", filmId);
+        if (filmOpt.isEmpty())
             throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        }
+        filmOpt.get().setLikes(getLikesId(filmId));
+        return filmOpt.get();
     }
-
 
     public void saveFilm(FilmDB filmDB) {
         int filmId = insert(
@@ -82,6 +79,8 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     }
 
     public void removeFilm(int filmId) {
+        delete(DELETE_FILM_FROM_LIKES_LIST, filmId);
+        delete(DELETE_FILM_FROM_GENRES_LIST, filmId);
         delete(DELETE_FILM, filmId);
     }
 

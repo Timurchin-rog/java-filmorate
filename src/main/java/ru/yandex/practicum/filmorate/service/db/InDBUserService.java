@@ -33,8 +33,8 @@ public class InDBUserService implements UserService {
 
     @Override
     public UserDto findById(int userId) {
-        UserDB userDb = userRepository.getUserById(userId);
-        User user = mapToUser(userDb);
+        UserDB userDB = userRepository.getUserById(userId);
+        User user = mapToUser(userDB);
         return UserMapper.mapToUserDto(user);
     }
 
@@ -76,6 +76,7 @@ public class InDBUserService implements UserService {
 
     @Override
     public void remove(int userId) {
+        userRepository.getUserById(userId);
         userRepository.removeUser(userId);
     }
 
