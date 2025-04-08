@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -215,5 +216,75 @@ public class InDBFilmService implements FilmService {
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
             film.setMpa(mpaRepository.getMpaById(filmDB.getMpa()));
         return film;
+    }
+
+    @Override
+    public List<FilmDto> searchFilms(String query, String by) {
+        if (by.contains("title")) {
+            List<FilmDB> films = filmRepository.searchFilmsByTitle(query);
+            return films.stream()
+                    .map(this::mapToFilm)
+                    .map(FilmMapper::mapToFilmDto)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<FilmDto> getCommonFilms(int userId, int friendId) {
+        try {
+            List<FilmDB> userFilmsDB = Optional.ofNullable(filmRepository.getFilmsByUserId(userId)).orElse(new ArrayList<>());
+            List<FilmDB> friendFilmsDB = Optional.ofNullable(filmRepository.getFilmsByUserId(friendId)).orElse(new ArrayList<>());
+
+            Set<FilmDto> userFilms = userFilmsDB.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toSet());
+            Set<FilmDto> friendFilms = friendFilmsDB.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toSet());
+
+            userFilms.retainAll(friendFilms);
+
+            if (userFilms.isEmpty()) {
+                log.info("Нет общих фильмов для пользователей {} и {}", userId, friendId);
+                return Collections.emptyList();
+            }
+
+            return userFilms.stream()
+                    .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed()
+                            .thenComparing(FilmDto::getName))
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении общих фильмов для пользователей {} и {}: {}", userId, friendId, e.getMessage());
+            throw new InternalServerException("Не удалось получить общие фильмы");
+        }
+    }
+
+    private FilmDto convertToDto(FilmDB filmDB) {
+        if (filmDB == null) {
+            throw new IllegalArgumentException("FilmDB cannot be null");
+        }
+
+        List<Genre> genres = filmDB.getGenres() != null ?
+                filmDB.getGenres().stream()
+                        .map(genreId -> genreRepository.getGenreById(genreId))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()) : new ArrayList<>();
+
+        MPA mpa = filmDB.getMpa() != null ?
+                mpaRepository.getMpaById(filmDB.getMpa()) : null;
+
+        return FilmDto.builder()
+                .id(filmDB.getId())
+                .name(filmDB.getName())
+                .description(filmDB.getDescription())
+                .releaseDate(filmDB.getReleaseDate())
+                .duration(filmDB.getDuration())
+                .likes(filmDB.getLikes() != null ? new HashSet<>(filmDB.getLikes()) : new HashSet<>())
+                .countLikes(filmDB.getCountLikes())
+                .genres(genres)
+                .mpa(mpa)
+                .build();
     }
 }
