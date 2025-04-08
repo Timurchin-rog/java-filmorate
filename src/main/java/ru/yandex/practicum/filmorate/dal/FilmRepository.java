@@ -6,10 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -31,6 +28,12 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     private static final String DELETE_LIKE_OF_FILM = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
     private static final String DELETE_FILM_FROM_LIKES_LIST = "DELETE FROM films_likes WHERE film_id = ?";
     private static final String DELETE_FILM_FROM_GENRES_LIST = "DELETE FROM films_genres WHERE film_id = ?";
+
+    private static final String SEARCH_FILMS_BY_TITLE = "SELECT * FROM films WHERE name ILIKE ?";
+    private static final String FIND_FILMS_BY_USER_ID = "SELECT f.* FROM films f " +
+            "JOIN films_likes fl ON f.id = fl.film_id " +
+            "WHERE fl.user_id = ?";
+
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<FilmDB> mapper, GenreRepository genreRepository) {
         super(jdbc, mapper);
@@ -126,5 +129,21 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 FIND_LIKES,
                 filmId
         );
+    }
+
+    public List<FilmDB> searchFilmsByTitle(String query) {
+        String searchPattern = "%" + query + "%";
+        List<FilmDB> filmDBList = findMany(SEARCH_FILMS_BY_TITLE, searchPattern);
+        return filmDBList.stream()
+                .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
+                .sorted(Comparator.comparing(FilmDB::getCountLikes).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDB> getFilmsByUserId(int userId) {
+        List<FilmDB> filmDBList = findMany(FIND_FILMS_BY_USER_ID, userId);
+        return filmDBList.stream()
+                .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
+                .collect(Collectors.toList());
     }
 }
