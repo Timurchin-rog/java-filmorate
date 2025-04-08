@@ -36,4 +36,10 @@ public interface FilmService {
     List<FilmDto> searchFilms(String query, String by);
 
     Collection<FilmDto> getCommonFilms(int userId, int friendId);
+
+    List<FilmDto> getRecommendedFilms(int userId);
+
+    List<FilmDto> searchFilmsByTitle(String query);
+
+    List<FilmDto> getFilmsByUserId(int userId);
 }
