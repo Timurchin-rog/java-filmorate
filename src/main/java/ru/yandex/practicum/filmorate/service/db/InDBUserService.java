@@ -34,10 +34,7 @@ public class InDBUserService implements UserService {
 
     @Override
     public UserDto findById(int userId) {
-        if (userRepository.getUserById(userId).isEmpty())
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        UserDB userDB = userRepository.getUserById(userId).get();
-        userDB.setFriends(userRepository.getAllFriendOfUser(userId));
+        UserDB userDB = userRepository.getUserById(userId);
         User user = mapToUser(userDB);
         return UserMapper.mapToUserDto(user);
     }
@@ -60,14 +57,10 @@ public class InDBUserService implements UserService {
             throw new ValidationException("При обновлении пользователя не указан id");
         }
         int userId = userFromRequest.getId();
-        if (userRepository.getUserById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        }
         if (checkDuplicatedEmail(userFromRequest)) {
             throw new DuplicatedDataException("Данный имейл уже используется");
         }
-        UserDB oldUser = userRepository.getUserById(userId).get();
-        oldUser.setFriends(userRepository.getAllFriendOfUser(userId));
+        UserDB oldUser = userRepository.getUserById(userId);
         UserDB updatedOldUser = UserMapper.updateUserFields(oldUser, userFromRequest);
         User user = mapToUser(updatedOldUser);
         UserDB userDB = UserMapper.mapToUserDB(user);
@@ -84,9 +77,7 @@ public class InDBUserService implements UserService {
 
     @Override
     public String remove(int userId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
-            return String.format("Пользователь %d не существует", userId);
-        }
+        userRepository.getUserById(userId);
         userRepository.removeUser(userId);
         return String.format("Пользователь id = %d удалён", userId);
     }
@@ -104,48 +95,25 @@ public class InDBUserService implements UserService {
 
     @Override
     public void addFriend(int userId, int friendId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        }
-        UserDB user = userRepository.getUserById(userId).get();
-        if (userRepository.getUserById(friendId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", friendId));
-        }
-        user.setFriends(userRepository.getAllFriendOfUser(userId));
+        UserDB user = userRepository.getUserById(userId);
+        userRepository.getUserById(friendId);
         userRepository.addFriend(userId, friendId);
         user.getFriends().add(friendId);
     }
 
     @Override
     public void removeFriend(int userId, int friendId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        }
-        UserDB user = userRepository.getUserById(userId).get();
-        if (userRepository.getUserById(friendId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", friendId));
-        }
-        user.setFriends(userRepository.getAllFriendOfUser(userId));
+        UserDB user = userRepository.getUserById(userId);
+        userRepository.getUserById(friendId);
         userRepository.removeFriend(userId, friendId);
         user.getFriends().remove(friendId);
     }
 
     @Override
     public List<UserDto> findAllFriends(int userId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        }
-        UserDB user = userRepository.getUserById(userId).get();
-        user.setFriends(userRepository.getAllFriendOfUser(userId));
+        UserDB user = userRepository.getUserById(userId);
         return user.getFriends().stream()
-                .map(friendId -> {
-                    if (userRepository.getUserById(friendId).isEmpty()) {
-                        throw new NotFoundException(String.format("Пользователь id = %d не найден", friendId));
-                    }
-                    UserDB friend = userRepository.getUserById(friendId).get();
-                    friend.setFriends(userRepository.getAllFriendOfUser(friendId));
-                    return friend;
-                })
+                .map(userRepository::getUserById)
                 .map(this::mapToUser)
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
@@ -153,26 +121,11 @@ public class InDBUserService implements UserService {
 
     @Override
     public List<UserDto> findCommonFriends(int userId, int otherUserId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
-        }
-        UserDB user = userRepository.getUserById(userId).get();
-        user.setFriends(userRepository.getAllFriendOfUser(userId));
-        if (userRepository.getUserById(otherUserId).isEmpty()) {
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", otherUserId));
-        }
-        UserDB otherUser = userRepository.getUserById(otherUserId).get();
-        otherUser.setFriends(userRepository.getAllFriendOfUser(otherUserId));
+        UserDB user = userRepository.getUserById(userId);
+        UserDB otherUser = userRepository.getUserById(otherUserId);
         return user.getFriends().stream()
                 .filter(friendId -> otherUser.getFriends().contains(friendId))
-                .map(friendId -> {
-                    if (userRepository.getUserById(friendId).isEmpty()) {
-                        throw new NotFoundException(String.format("Пользователь id = %d не найден", friendId));
-                    }
-                    UserDB friend = userRepository.getUserById(friendId).get();
-                    friend.setFriends(userRepository.getAllFriendOfUser(friendId));
-                    return friend;
-                })
+                .map(userRepository::getUserById)
                 .map(this::mapToUser)
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());

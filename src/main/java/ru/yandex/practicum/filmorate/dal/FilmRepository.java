@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -44,8 +45,12 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 .collect(Collectors.toList());
     }
 
-    public Optional<FilmDB> getFilmById(int filmId) {
-        return findOne("SELECT * FROM films WHERE id = ?", filmId);
+    public FilmDB getFilmById(int filmId) {
+        Optional<FilmDB> filmOpt = findOne("SELECT * FROM films WHERE id = ?", filmId);
+        if (filmOpt.isEmpty())
+            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
+        filmOpt.get().setLikes(getLikesId(filmId));
+        return filmOpt.get();
     }
 
     public void saveFilm(FilmDB filmDB) {
@@ -85,7 +90,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 filmId,
                 userId
         );
-        FilmDB filmDB = getFilmById(filmId).get();
+        FilmDB filmDB = getFilmById(filmId);
         int countLikes = filmDB.getCountLikes();
         countLikes += 1;
         update("UPDATE films SET count_likes = ? WHERE id = ?",
@@ -99,7 +104,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 filmId,
                 userId
         );
-        FilmDB filmDB = getFilmById(filmId).get();
+        FilmDB filmDB = getFilmById(filmId);
         int countLikes = filmDB.getCountLikes();
         if (countLikes > 0) {
             countLikes -= 1;

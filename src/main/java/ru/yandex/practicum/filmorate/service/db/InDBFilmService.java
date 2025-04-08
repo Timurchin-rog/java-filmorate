@@ -42,10 +42,7 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public FilmDto findById(int filmId) {
-        if (filmRepository.getFilmById(filmId).isEmpty())
-            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        FilmDB filmDB = filmRepository.getFilmById(filmId).get();
-        filmDB.setLikes(filmRepository.getLikesId(filmId));
+        FilmDB filmDB = filmRepository.getFilmById(filmId);
         Film film = mapToFilm(filmDB);
         return FilmMapper.mapToFilmDto(film);
     }
@@ -58,7 +55,6 @@ public class InDBFilmService implements FilmService {
         if (filmFromRequest.getGenres() != null) {
             List<Genre> genres = filmFromRequest.getGenres();
             genresId = genres.stream()
-
                             .map(Genre::getId)
                             .collect(Collectors.toSet());
             genreRepository.checkGenres(genresId);
@@ -78,10 +74,7 @@ public class InDBFilmService implements FilmService {
             throw new ValidationException("При обновлении фильма не указан id");
         }
         int filmId = filmFromRequest.getId();
-        if (filmRepository.getFilmById(filmId).isEmpty())
-            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        FilmDB oldFilm = filmRepository.getFilmById(filmId).get();
-        oldFilm.setLikes(filmRepository.getLikesId(filmId));
+        FilmDB oldFilm = filmRepository.getFilmById(filmId);
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
         Film film = mapToFilm(updatedOldFilm);
         FilmDB filmDB = FilmMapper.mapToFilmDB(film);
@@ -92,18 +85,14 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public String remove(int filmId) {
-        if (filmRepository.getFilmById(filmId).isEmpty())
-            return String.format("Фильм id = %d не существует", filmId);
+        filmRepository.getFilmById(filmId);
         filmRepository.removeFilm(filmId);
         return String.format("Фильм id = %d удалён", filmId);
     }
 
     @Override
     public void addLike(int filmId, int userId) {
-        if (filmRepository.getFilmById(filmId).isEmpty())
-            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        FilmDB filmDB = filmRepository.getFilmById(filmId).get();
-        filmDB.setLikes(filmRepository.getLikesId(filmId));
+        FilmDB filmDB = filmRepository.getFilmById(filmId);
         userService.findById(userId);
         filmRepository.addLike(filmId, userId);
         filmDB.getLikes().add(userId);
@@ -111,10 +100,7 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public void removeLike(int filmId, int userId) {
-        if (filmRepository.getFilmById(filmId).isEmpty())
-            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        FilmDB filmDB = filmRepository.getFilmById(filmId).get();
-        filmDB.setLikes(filmRepository.getLikesId(filmId));
+        FilmDB filmDB = filmRepository.getFilmById(filmId);
         userService.findById(userId);
         filmRepository.removeLike(filmId, userId);
         filmDB.getLikes().remove(userId);
@@ -161,7 +147,7 @@ public class InDBFilmService implements FilmService {
                 .description(filmDB.getDescription())
                 .releaseDate(filmDB.getReleaseDate())
                 .duration(filmDB.getDuration())
-                .likes(filmRepository.getLikesId(filmDB.getId()))
+                .likes(filmDB.getLikes())
                 .countLikes(filmDB.getCountLikes())
                 .genres(genreRepository.getGenresOfFilm(filmDB.getId()))
                 .build();
