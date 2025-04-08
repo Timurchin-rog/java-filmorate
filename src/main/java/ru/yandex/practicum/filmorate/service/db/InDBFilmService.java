@@ -84,7 +84,7 @@ public class InDBFilmService implements FilmService {
     @Override
     public FilmDto update(Film filmFromRequest) {
         if (filmFromRequest.getId() == null) {
-            throw new ValidationException("При обновлении фильма не указан id");
+            throw new ValidationException();
         }
         int filmId = filmFromRequest.getId();
         FilmDB oldFilm = filmRepository.getFilmById(filmId);
@@ -173,7 +173,7 @@ public class InDBFilmService implements FilmService {
     @Override
     public Director updateDirector(Director directorFromRequest) {
         if (directorFromRequest.getId() == null) {
-            throw new ValidationException("При обновлении режиссёра не указан id");
+            throw new ValidationException();
         }
         directorRepository.updateDirector(directorFromRequest);
         return directorFromRequest;

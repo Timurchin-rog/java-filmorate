@@ -10,12 +10,6 @@ import ru.yandex.practicum.filmorate.exception.*;
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleValidation(final ValidationException e) {
-        return e.getMessage();
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleServerError(final InternalServerException e) {
         return e.getMessage();

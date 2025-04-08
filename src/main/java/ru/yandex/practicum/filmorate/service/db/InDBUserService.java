@@ -53,7 +53,7 @@ public class InDBUserService implements UserService {
     @Override
     public UserDto update(User userFromRequest) {
         if (userFromRequest.getId() == null) {
-            throw new ValidationException("При обновлении пользователя не указан id");
+            throw new ValidationException();
         }
         int userId = userFromRequest.getId();
         if (checkDuplicatedEmail(userFromRequest)) {
