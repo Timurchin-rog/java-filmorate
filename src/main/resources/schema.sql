@@ -1,11 +1,11 @@
 DROP TABLE IF EXISTS users_friends;
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS films_likes;
-DROP TABLE IF EXISTS films;
+DROP TABLE IF EXISTS user_feeds;
+DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS films_genres;
 DROP TABLE IF EXISTS genres;
+DROP TABLE IF EXISTS films;
 DROP TABLE IF EXISTS ratings;
-DROP TABLE IF EXISTS user_feeds;
 
 CREATE TABLE IF NOT EXISTS users (
 	id integer PRIMARY KEY AUTO_INCREMENT,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS users_friends (
-    id integer PRIMARY KEY AUTO_INCREMENT,
+  id integer PRIMARY KEY AUTO_INCREMENT,
 	user_id integer REFERENCES users(id),
 	friend_id integer REFERENCES users(id)
 );

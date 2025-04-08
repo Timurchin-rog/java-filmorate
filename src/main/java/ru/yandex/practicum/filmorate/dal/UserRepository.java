@@ -24,6 +24,7 @@ public class UserRepository extends BaseRepository<UserDB> {
     private static final String INSERT_FRIEND_OF_USER = "INSERT INTO users_friends(user_id, friend_id) " +
             "VALUES (?, ?)";
     private static final String DELETE_FRIEND_OF_USER = "DELETE FROM users_friends WHERE user_id = ? AND friend_id = ?";
+    private static final String DELETE_USER_FROM_FRIENDS_LIST = "DELETE FROM users_friends WHERE user_id = ? OR friend_id = ?";
     private static final String FIND_ALL_FRIEND_OF_USER = "SELECT friend_id FROM users_friends WHERE user_id = ?";
 
     public UserRepository(JdbcTemplate jdbc, RowMapper<UserDB> mapper) {
@@ -40,12 +41,10 @@ public class UserRepository extends BaseRepository<UserDB> {
 
     public UserDB getUserById(int userId) {
         Optional<UserDB> userOpt = findOne(FIND_USER_BY_ID, userId);
-        if (userOpt.isPresent()) {
-            userOpt.get().setFriends(getAllFriendOfUser(userId));
-            return userOpt.get();
-        } else {
-            throw new NotFoundException(String.format("Фильм id = %d не найден", userId));
-        }
+        if (userOpt.isEmpty())
+            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
+        userOpt.get().setFriends(getAllFriendOfUser(userId));
+        return userOpt.get();
     }
 
     public void saveUser(UserDB user) {
@@ -71,6 +70,7 @@ public class UserRepository extends BaseRepository<UserDB> {
     }
 
     public void removeUser(int userId) {
+        delete(DELETE_USER_FROM_FRIENDS_LIST, userId, userId);
         delete(DELETE_USER, userId);
     }
 
@@ -80,8 +80,6 @@ public class UserRepository extends BaseRepository<UserDB> {
                 userId,
                 friendId
         );
-        UserDB userDB = getUserById(userId);
-        userDB.setFriends(getAllFriendOfUser(userId));
     }
 
     public void removeFriend(int userId, int friendId) {
@@ -90,8 +88,6 @@ public class UserRepository extends BaseRepository<UserDB> {
                 userId,
                 friendId
         );
-        UserDB userDB = getUserById(userId);
-        userDB.setFriends(getAllFriendOfUser(userId));
     }
 
     public Set<Integer> getAllFriendOfUser(int userId) {
