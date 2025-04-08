@@ -19,8 +19,8 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFound(final NotFoundException e) {
-        return Map.of("Ошибка", e.getMessage());
+    public String handleNotFound(final NotFoundException e) {
+        return e.getMessage();
     }
 
     @ExceptionHandler
