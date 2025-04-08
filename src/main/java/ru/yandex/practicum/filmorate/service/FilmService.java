@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -31,4 +32,7 @@ public interface FilmService {
     List<MPA> findAllMPA();
 
     MPA findMPAById(int mpaId);
+
+    @Transactional(readOnly = true)
+    List<FilmDto> getRecommendedFilms(int userId);
 }

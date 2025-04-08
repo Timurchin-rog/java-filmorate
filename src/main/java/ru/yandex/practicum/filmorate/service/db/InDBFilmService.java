@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.db;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
@@ -54,8 +55,8 @@ public class InDBFilmService implements FilmService {
         if (filmFromRequest.getGenres() != null) {
             List<Genre> genres = filmFromRequest.getGenres();
             genresId = genres.stream()
-                            .map(Genre::getId)
-                            .collect(Collectors.toSet());
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
             genreRepository.checkGenres(genresId);
         }
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
@@ -152,5 +153,20 @@ public class InDBFilmService implements FilmService {
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
             film.setMpa(mpaRepository.getMpaById(filmDB.getMpa()));
         return film;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> getRecommendedFilms(int userId) {
+     // находим пользователей
+        Set<Integer> similarUser = filmRepository.findSimilarUsers(userId);
+        log.info("Для пользователя {} найдены похожие пользователи: {}", userId, similarUser);
+        // получаем рекомендации
+        List<FilmDB> recommendFilms = filmRepository.findFilmsLikedBySimilarUsers(userId, similarUser);
+        return recommendFilms.stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+
     }
 }

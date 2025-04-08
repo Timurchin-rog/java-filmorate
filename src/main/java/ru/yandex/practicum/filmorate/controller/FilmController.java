@@ -58,5 +58,9 @@ public class FilmController {
         return filmService.findPopularFilms(count);
     }
 
-
+    @GetMapping("/recommendations")
+    public List<FilmDto> getRecommendations(
+            @RequestParam(name = "user-id") int userId) {
+        return filmService.getRecommendedFilms(userId);
+    }
 }
