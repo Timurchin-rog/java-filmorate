@@ -34,7 +34,6 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     private static final String DELETE_FILM_FROM_LIKES_LIST = "DELETE FROM films_likes WHERE film_id = ?";
     private static final String DELETE_FILM_FROM_GENRES_LIST = "DELETE FROM films_genres WHERE film_id = ?";
     private static final String DELETE_FILM_FROM_DIRECTORS_LIST = "DELETE FROM films_directors WHERE film_id = ?";
-
     private static final String SEARCH_FILMS_BY_TITLE = "SELECT * FROM films WHERE name ILIKE ?";
     private static final String FIND_FILMS_BY_USER_ID = "SELECT f.* FROM films f " +
             "JOIN films_likes fl ON f.id = fl.film_id " +
@@ -96,6 +95,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     public void removeFilm(int filmId) {
         delete(DELETE_FILM_FROM_LIKES_LIST, filmId);
         delete(DELETE_FILM_FROM_GENRES_LIST, filmId);
+        delete(DELETE_FILM_FROM_DIRECTORS_LIST, filmId);
         delete(DELETE_FILM, filmId);
     }
 
