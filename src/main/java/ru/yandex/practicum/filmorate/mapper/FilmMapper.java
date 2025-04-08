@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,10 +24,16 @@ public final class FilmMapper {
         if (film.getMpa() != null)
             filmDB.setMpa(film.getMpa().getId());
         if (film.getGenres() != null) {
-            List<Integer> genres = film.getGenres().stream()
+            List<Integer> genresId = film.getGenres().stream()
                     .map(Genre::getId)
                     .collect(Collectors.toList());
-            filmDB.setGenres(genres);
+            filmDB.setGenres(genresId);
+        }
+        if (film.getDirectors() != null) {
+            List<Integer> directorsId = film.getDirectors().stream()
+                    .map(Director::getId)
+                    .toList();
+            filmDB.setDirectors(directorsId);
         }
         return filmDB;
     }
@@ -42,31 +49,38 @@ public final class FilmMapper {
                 .countLikes(film.getCountLikes())
                 .genres(film.getGenres())
                 .mpa(film.getMpa())
+                .directors(film.getDirectors())
                 .build();
     }
 
-    public static FilmDB updateFilmFields(FilmDB film, Film filmFromRequest) {
+    public static FilmDB updateFilmFields(FilmDB filmDB, Film filmFromRequest) {
         if (filmFromRequest.hasName()) {
-            film.setName(filmFromRequest.getName());
+            filmDB.setName(filmFromRequest.getName());
         }
         if (filmFromRequest.hasDescription()) {
-            film.setDescription(filmFromRequest.getDescription());
+            filmDB.setDescription(filmFromRequest.getDescription());
         }
         if (filmFromRequest.hasReleaseDate()) {
-            film.setReleaseDate(filmFromRequest.getReleaseDate());
+            filmDB.setReleaseDate(filmFromRequest.getReleaseDate());
         }
         if (filmFromRequest.hasDuration()) {
-            film.setDuration(filmFromRequest.getDuration());
+            filmDB.setDuration(filmFromRequest.getDuration());
         }
         if (filmFromRequest.hasGenres()) {
             List<Integer> genresId = filmFromRequest.getGenres().stream()
                             .map(Genre::getId)
                             .toList();
-            film.setGenres(genresId);
+            filmDB.setGenres(genresId);
         }
         if (filmFromRequest.hasMpa()) {
-            film.setMpa(filmFromRequest.getMpa().getId());
+            filmDB.setMpa(filmFromRequest.getMpa().getId());
         }
-        return film;
+        if (filmFromRequest.hasDirectors()) {
+            List<Integer> directorsId = filmFromRequest.getDirectors().stream()
+                    .map(Director::getId)
+                    .toList();
+            filmDB.setDirectors(directorsId);
+        }
+        return filmDB;
     }
 }

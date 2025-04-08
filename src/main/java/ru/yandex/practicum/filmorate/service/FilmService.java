@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -31,4 +32,16 @@ public interface FilmService {
     List<MPA> findAllMPA();
 
     MPA findMPAById(int mpaId);
+
+    List<Director> findAllDirectors();
+
+    Director findDirectorById(int directorId);
+
+    Director createDirector(Director director);
+
+    Director updateDirector(Director director);
+
+    void removeDirector(int directorId);
+
+    List<FilmDto> findFilmsOfDirector(int directorId, String sortBy);
 }
