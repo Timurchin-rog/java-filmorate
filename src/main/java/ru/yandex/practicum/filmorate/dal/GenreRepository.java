@@ -51,16 +51,14 @@ public class GenreRepository extends BaseRepository<Genre> {
                     filmId,
                     genreId
             );
-
         }
     }
 
-    public boolean isExistGenres(Set<Integer> genresId) {
+    public void checkGenres(Set<Integer> genresId) {
         for (Integer genreId : genresId) {
             Optional<Genre> genreOpt = findOne(FIND_GENRE_BY_ID, genreId);
             if (genreOpt.isEmpty())
-                throw new NotFoundException(String.format("Возрастной рейтинг id = %d не найден", genreId));
+                throw new NotFoundException(String.format("Жанр id = %d не найден", genreId));
         }
-        return true;
     }
 }

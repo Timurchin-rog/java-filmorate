@@ -13,7 +13,6 @@ import java.util.Optional;
 public class MPARepository extends BaseRepository<MPA> {
     private static final String FIND_All_RATING = "SELECT * FROM ratings";
     private static final String FIND_RATING_BY_ID = "SELECT * FROM ratings WHERE id = ?";
-    private static final String FIND_RATING_BY_NAME = "SELECT * FROM ratings WHERE name = ?";
 
     public MPARepository(JdbcTemplate jdbc, RowMapper<MPA> mapper) {
         super(jdbc, mapper);
@@ -30,14 +29,7 @@ public class MPARepository extends BaseRepository<MPA> {
         return mpaOpt.get();
     }
 
-    public MPA getMpaByName(String mpaName) {
-        Optional<MPA> mpaOpt = findOne(FIND_RATING_BY_NAME, mpaName);
-        if (mpaOpt.isEmpty())
-            throw new NotFoundException(String.format("Возрастной рейтинг name = %s не найден", mpaName));
-        return mpaOpt.get();
-    }
-
-    public void isExistMpa(int mpaId) {
+    public void checkMpa(int mpaId) {
         Optional<MPA> mpaOpt = findOne(FIND_RATING_BY_ID, mpaId);
         if (mpaOpt.isEmpty())
             throw new NotFoundException(String.format("Возрастной рейтинг id = %d не найден", mpaId));
