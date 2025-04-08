@@ -30,8 +30,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     private static final String DELETE_LIKE_OF_FILM = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
     private static final String SEARCH_FILMS_BY_TITLE = "SELECT * FROM films WHERE name ILIKE ?";
     private static final String FIND_FILMS_BY_USER_ID = "SELECT f.* FROM films f " +
-            "JOIN films_likes fl ON f.id = fl.film_id " +
-            "WHERE fl.user_id = ?";
+            "JOIN films_likes fl ON f.id = fl.film_id WHERE fl.user_id = ?";
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<FilmDB> mapper, GenreRepository genreRepository) {
         super(jdbc, mapper);
