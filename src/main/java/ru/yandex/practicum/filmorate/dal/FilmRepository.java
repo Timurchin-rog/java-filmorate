@@ -145,7 +145,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
 
     public Set<Integer> findSimilarUsers(int userId) {
         String sql = """
-                SELECT DISTINCT fl2.user_id
+                SELECT fl2.user_id
                 FROM films_likes fl1
                 JOIN films_likes fl2 ON fl1.film_id = fl2.film_id
                 WHERE fl1.user_id = ? AND fl2.user_id != ?
