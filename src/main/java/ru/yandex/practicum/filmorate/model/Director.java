@@ -12,4 +12,3 @@ public class Director {
     Integer id;
     String name;
 }
-
