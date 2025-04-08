@@ -31,7 +31,7 @@ public class GenreRepository extends BaseRepository<Genre> {
     public Genre getGenreById(int genreId) {
         Optional<Genre> genreOpt = findOne(FIND_GENRE_BY_ID, genreId);
         if (genreOpt.isEmpty())
-            throw new NotFoundException(String.format("Genre id = %d not found", genreId));
+            throw new NotFoundException();
         return genreOpt.get();
     }
 
@@ -58,7 +58,7 @@ public class GenreRepository extends BaseRepository<Genre> {
         for (Integer genreId : genresId) {
             Optional<Genre> genreOpt = findOne(FIND_GENRE_BY_ID, genreId);
             if (genreOpt.isEmpty())
-                throw new NotFoundException(String.format("Genre id = %d not found", genreId));
+                throw new NotFoundException();
         }
     }
 }

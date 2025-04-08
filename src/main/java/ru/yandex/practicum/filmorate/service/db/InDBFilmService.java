@@ -268,7 +268,7 @@ public class InDBFilmService implements FilmService {
 
         List<Genre> genres = filmDB.getGenres() != null ?
                 filmDB.getGenres().stream()
-                        .map(genreId -> genreRepository.getGenreById(genreId))
+                        .map(genreRepository::getGenreById)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()) : new ArrayList<>();
 

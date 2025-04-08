@@ -34,7 +34,7 @@ public class DirectorRepository extends BaseRepository<Director> {
     public Director getDirectorById(int directorId) {
         Optional<Director> directorOpt  = findOne(FIND_DIRECTOR_BY_ID, directorId);
         if (directorOpt.isEmpty())
-            throw new NotFoundException(String.format("Director id = %d not found", directorId));
+            throw new NotFoundException();
         return directorOpt.get();
     }
 
@@ -82,7 +82,7 @@ public class DirectorRepository extends BaseRepository<Director> {
         for (Integer directorId : directorsId) {
             Optional<Director> directorOpt = findOne(FIND_DIRECTOR_BY_ID, directorId);
             if (directorOpt.isEmpty())
-                throw new NotFoundException(String.format("Director id = %d not found", directorId));
+                throw new NotFoundException();
         }
     }
 }
