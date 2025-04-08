@@ -52,13 +52,12 @@ public class InDBFilmService implements FilmService {
         if (filmFromRequest.getGenres() != null) {
             List<Genre> genres = filmFromRequest.getGenres();
             genresId = genres.stream()
-
-                    .map(Genre::getId)
-                    .collect(Collectors.toSet());
-            genreRepository.isExistGenres(genresId);
+                            .map(Genre::getId)
+                            .collect(Collectors.toSet());
+            genreRepository.checkGenres(genresId);
         }
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
-            mpaRepository.isExistMpa(filmDB.getMpa());
+            mpaRepository.checkMpa(filmDB.getMpa());
         filmRepository.saveFilm(filmDB);
         genreRepository.addGenres(filmDB.getId(), genresId);
         log.info(String.format("Новый фильм id = %d добавлен", filmDB.getId()));
@@ -82,8 +81,9 @@ public class InDBFilmService implements FilmService {
     }
 
     @Override
-    public void remove(int userId) {
-        filmRepository.removeFilm(userId);
+    public void remove(int filmId) {
+        filmRepository.getFilmById(filmId);
+        filmRepository.removeFilm(filmId);
     }
 
     @Override
@@ -104,11 +104,11 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public List<FilmDto> findPopularFilms(int count) {
-        List<FilmDB> filmsPopular = filmRepository.getPopularFilms(count);
-        if (filmsPopular.size() < count) {
-            count = filmsPopular.size();
+        List<FilmDB> films = filmRepository.getAllFilms();
+        if (films.size() < count) {
+            count = films.size();
         }
-        return filmsPopular.stream()
+        return films.stream()
                 .map(this::mapToFilm)
                 .map(FilmMapper::mapToFilmDto)
                 .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())
@@ -143,7 +143,7 @@ public class InDBFilmService implements FilmService {
                 .description(filmDB.getDescription())
                 .releaseDate(filmDB.getReleaseDate())
                 .duration(filmDB.getDuration())
-                .likes(filmRepository.getLikesId(filmDB.getId()))
+                .likes(filmDB.getLikes())
                 .countLikes(filmDB.getCountLikes())
                 .genres(genreRepository.getGenresOfFilm(filmDB.getId()))
                 .build();
