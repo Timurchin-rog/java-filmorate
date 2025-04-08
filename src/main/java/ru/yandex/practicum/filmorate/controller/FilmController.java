@@ -75,11 +75,6 @@ public class FilmController {
         return filmService.getRecommendedFilms(userId);
     }
 
-    @GetMapping("/search")
-    public List<FilmDto> searchFilms(@RequestParam String query) {
-        return filmService.searchFilmsByTitle(query);
-    }
-
     @GetMapping("/user/{userId}")
     public List<FilmDto> getFilmsByUser(@PathVariable int userId) {
         return filmService.getFilmsByUserId(userId);
