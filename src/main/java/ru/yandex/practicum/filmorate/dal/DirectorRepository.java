@@ -47,7 +47,7 @@ public class DirectorRepository extends BaseRepository<Director> {
         return findMany(FIND_DIRECTORS_OF_FILM, filmId);
     }
 
-    public void addDirectorsWithFilm(Integer filmId, List<Integer> directorsId) {
+    public void addDirectorsWithFilm(int filmId, List<Integer> directorsId) {
         for (Integer directorId : directorsId) {
             insert(
                     "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)",

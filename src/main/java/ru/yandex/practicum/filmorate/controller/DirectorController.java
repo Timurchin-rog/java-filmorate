@@ -19,7 +19,7 @@ public class DirectorController {
     }
 
     @GetMapping("/{id}")
-    public Director findById(int id) {
+    public Director findById(@PathVariable int id) {
         return filmService.findDirectorById(id);
     }
 
@@ -34,7 +34,7 @@ public class DirectorController {
     }
 
     @DeleteMapping("/{id}")
-    public void remove(int id) {
+    public void remove(@PathVariable int id) {
         filmService.removeDirector(id);
     }
 }
