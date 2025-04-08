@@ -76,14 +76,9 @@ public class InDBUserService implements UserService {
     }
 
     @Override
-    public String remove(int userId) {
-        try {
-            userRepository.getUserById(userId);
-            userRepository.removeUser(userId);
-            return String.format("Пользователь id = %d удалён", userId);
-        } catch (NotFoundException e) {
-            return String.format("Пользователь id = %d не удалён", userId);
-        }
+    public void remove(int userId) {
+        userRepository.getUserById(userId);
+        userRepository.removeUser(userId);
     }
 
     private User mapToUser(UserDB userDB) {

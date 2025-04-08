@@ -83,10 +83,9 @@ public class InDBFilmService implements FilmService {
     }
 
     @Override
-    public String remove(int filmId) {
+    public void remove(int filmId) {
         filmRepository.getFilmById(filmId);
         filmRepository.removeFilm(filmId);
-        return String.format("Фильм id = %d удалён", filmId);
     }
 
     @Override

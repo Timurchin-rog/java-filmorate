@@ -38,8 +38,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{user-id}")
-    public String remove(@PathVariable(name = "user-id") int userId) {
-        return userService.remove(userId);
+    public void remove(@PathVariable(name = "user-id") int userId) {
+        userService.remove(userId);
     }
 
     @PutMapping(pathFriends)
