@@ -257,7 +257,7 @@ public class InDBFilmService implements FilmService {
 
         } catch (Exception e) {
             log.error("Ошибка при получении общих фильмов для пользователей {} и {}: {}", userId, friendId, e.getMessage());
-            throw new InternalServerException("Не удалось получить общие фильмы");
+            throw new InternalServerException();
         }
     }
 
