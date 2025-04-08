@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.db;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.EventRepository;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -30,6 +32,7 @@ public class InDBFilmService implements FilmService {
     private final GenreRepository genreRepository;
     private final MPARepository mpaRepository;
     private final UserService userService;
+    private final EventRepository eventRepository;
 
     @Override
     public List<FilmDto> findAll() {
@@ -94,6 +97,13 @@ public class InDBFilmService implements FilmService {
         userService.findById(userId);
         filmRepository.addLike(filmId, userId);
         filmDB.getLikes().add(userId);
+        eventRepository.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(Event.EventType.LIKE)
+                .operation(Event.Operation.ADD)
+                .entityId(filmId)
+                .timestamp(System.currentTimeMillis())
+                .build());
     }
 
     @Override
@@ -102,6 +112,13 @@ public class InDBFilmService implements FilmService {
         userService.findById(userId);
         filmRepository.removeLike(filmId, userId);
         filmDB.getLikes().remove(userId);
+        eventRepository.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(Event.EventType.LIKE)
+                .operation(Event.Operation.REMOVE)
+                .entityId(filmId)
+                .timestamp(System.currentTimeMillis())
+                .build());
     }
 
     @Override
