@@ -65,8 +65,8 @@ public class UserRepository extends BaseRepository<UserDB> {
     }
 
     public void removeUser(int userId) {
-        delete(DELETE_USER, userId);
         delete(DELETE_USER_FROM_FRIENDS_LIST, userId, userId);
+        delete(DELETE_USER, userId);
     }
 
     public void addFriend(int userId, int friendId) {

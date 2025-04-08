@@ -74,9 +74,9 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     }
 
     public void removeFilm(int filmId) {
-        delete(DELETE_FILM, filmId);
         delete(DELETE_FILM_FROM_LIKES_LIST, filmId);
         delete(DELETE_FILM_FROM_GENRES_LIST, filmId);
+        delete(DELETE_FILM, filmId);
     }
 
     public void addLike(int filmId, int userId) {
