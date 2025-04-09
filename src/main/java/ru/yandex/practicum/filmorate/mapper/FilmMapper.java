@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,12 +40,6 @@ public final class FilmMapper {
     }
 
     public static FilmDto mapToFilmDto(Film film) {
-        List<Genre> genres = film.getGenres().stream()
-                .sorted(Comparator.comparing(Genre::getId))
-                .toList();
-        List<Director> directors = film.getDirectors().stream().
-                sorted(Comparator.comparing(Director::getId)).
-                toList();
         return FilmDto.builder()
                 .id(film.getId())
                 .name(film.getName())
@@ -55,9 +48,13 @@ public final class FilmMapper {
                 .duration(film.getDuration())
                 .likes(film.getLikes())
                 .countLikes(film.getCountLikes())
-                .genres(genres)
+                .genres(film.getGenres().stream()
+                        .sorted(Comparator.comparing(Genre::getId))
+                        .toList())
                 .mpa(film.getMpa())
-                .directors(directors)
+                .directors(film.getDirectors().stream()
+                        .sorted(Comparator.comparing(Director::getId))
+                        .toList())
                 .build();
     }
 
