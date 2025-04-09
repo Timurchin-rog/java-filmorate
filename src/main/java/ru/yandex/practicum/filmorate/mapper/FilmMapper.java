@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Director;
 
+import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,9 +48,13 @@ public final class FilmMapper {
                 .duration(film.getDuration())
                 .likes(film.getLikes())
                 .countLikes(film.getCountLikes())
-                .genres(film.getGenres())
+                .genres(film.getGenres().stream()
+                        .sorted(Comparator.comparing(Genre::getId))
+                        .toList())
                 .mpa(film.getMpa())
-                .directors(film.getDirectors())
+                .directors(film.getDirectors().stream().
+                        sorted(Comparator.comparing(Director::getId)).
+                        toList())
                 .build();
     }
 
@@ -66,7 +71,7 @@ public final class FilmMapper {
         if (filmFromRequest.hasDuration()) {
             filmDB.setDuration(filmFromRequest.getDuration());
         }
-        if (filmFromRequest.hasGenres()) {
+        if (filmFromRequest.hasGenres() && !filmFromRequest.getGenres().isEmpty()) {
             Set<Integer> genresId = filmFromRequest.getGenres().stream()
                             .map(Genre::getId)
                             .collect(Collectors.toSet());
@@ -75,7 +80,7 @@ public final class FilmMapper {
         if (filmFromRequest.hasMpa()) {
             filmDB.setMpa(filmFromRequest.getMpa().getId());
         }
-        if (filmFromRequest.hasDirectors()) {
+        if (filmFromRequest.hasDirectors() && !filmFromRequest.getDirectors().isEmpty()) {
             Set<Integer> directorsId = filmFromRequest.getDirectors().stream()
                     .map(Director::getId)
                     .collect(Collectors.toSet());

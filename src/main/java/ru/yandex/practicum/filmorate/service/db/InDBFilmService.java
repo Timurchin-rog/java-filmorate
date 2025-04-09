@@ -57,8 +57,10 @@ public class InDBFilmService implements FilmService {
             mpaRepository.checkMpa(filmDB.getMpa());
 
         filmRepository.saveFilm(filmDB);
-        genreRepository.addGenres(filmDB.getId(), addGenresInFilm(filmFromRequest));
-        directorRepository.addDirectors(filmDB.getId(), addDirectorsInFilm(filmFromRequest));
+
+        genreRepository.addGenres(filmDB.getId(), checkGenres(filmFromRequest));
+        directorRepository.addDirectors(filmDB.getId(), checkDirectors(filmFromRequest));
+
         log.info(String.format("Новый фильм id = %d добавлен", filmDB.getId()));
         Film filmForClients = mapToFilm(filmDB);
         return FilmMapper.mapToFilmDto(filmForClients);
@@ -72,6 +74,13 @@ public class InDBFilmService implements FilmService {
         int filmId = filmFromRequest.getId();
         FilmDB oldFilm = filmRepository.getFilmById(filmId);
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
+
+        Set<Integer> genresId = checkGenres(filmFromRequest);
+        genreRepository.addGenres(updatedOldFilm.getId(), genresId);
+
+        Set<Integer> directorsId = checkDirectors(filmFromRequest);
+        directorRepository.addDirectors(updatedOldFilm.getId(), directorsId);
+
         Film film = mapToFilm(updatedOldFilm);
         FilmDB filmDB = FilmMapper.mapToFilmDB(film);
         filmRepository.updateFilm(filmDB);
@@ -175,7 +184,7 @@ public class InDBFilmService implements FilmService {
         List<FilmDto> filmsOfDirector = findAll().stream()
                 .filter(filmDto -> filmDto.getDirectors().contains(director))
                 .toList();
-        if (sortBy.equalsIgnoreCase("likes")) {
+        if (sortBy.toLowerCase().equals("likes")) {
             return filmsOfDirector.stream()
                     .sorted(Comparator.comparing(FilmDto::getCountLikes))
                     .toList();
@@ -185,7 +194,7 @@ public class InDBFilmService implements FilmService {
                 .toList();
     }
 
-    private Set<Integer> addGenresInFilm(Film filmFromRequest) {
+    private Set<Integer> checkGenres(Film filmFromRequest) {
         Set<Integer> genresId = new HashSet<>();
         if (filmFromRequest.getGenres() != null) {
             Set<Genre> genres = filmFromRequest.getGenres();
@@ -197,7 +206,7 @@ public class InDBFilmService implements FilmService {
         return genresId;
     }
 
-    private Set<Integer> addDirectorsInFilm(Film filmFromRequest) {
+    private Set<Integer> checkDirectors(Film filmFromRequest) {
         Set<Integer> directorsId = new HashSet<>();
         if (filmFromRequest.getDirectors() != null) {
             Set<Director> directors = filmFromRequest.getDirectors();
@@ -274,11 +283,12 @@ public class InDBFilmService implements FilmService {
             throw new IllegalArgumentException("FilmDB cannot be null");
         }
 
-        Set<Genre> genres = filmDB.getGenres() != null ?
+        List<Genre> genres = filmDB.getGenres() != null ?
                 filmDB.getGenres().stream()
                         .map(genreRepository::getGenreById)
                         .filter(Objects::nonNull)
-                        .collect(Collectors.toSet()) : new HashSet<>();
+                        .sorted(Comparator.comparing(Genre::getId))
+                        .collect(Collectors.toList()) : new ArrayList<>();
 
         MPA mpa = filmDB.getMpa() != null ?
                 mpaRepository.getMpaById(filmDB.getMpa()) : null;
