@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -24,15 +25,15 @@ public final class FilmMapper {
         if (film.getMpa() != null)
             filmDB.setMpa(film.getMpa().getId());
         if (film.getGenres() != null) {
-            List<Integer> genresId = film.getGenres().stream()
+            Set<Integer> genresId = film.getGenres().stream()
                     .map(Genre::getId)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
             filmDB.setGenres(genresId);
         }
         if (film.getDirectors() != null) {
-            List<Integer> directorsId = film.getDirectors().stream()
+            Set<Integer> directorsId = film.getDirectors().stream()
                     .map(Director::getId)
-                    .toList();
+                    .collect(Collectors.toSet());
             filmDB.setDirectors(directorsId);
         }
         return filmDB;
@@ -67,18 +68,18 @@ public final class FilmMapper {
             filmDB.setDuration(filmFromRequest.getDuration());
         }
         if (filmFromRequest.hasGenres()) {
-            List<Integer> genresId = filmFromRequest.getGenres().stream()
+            Set<Integer> genresId = filmFromRequest.getGenres().stream()
                             .map(Genre::getId)
-                            .toList();
+                            .collect(Collectors.toSet());
             filmDB.setGenres(genresId);
         }
         if (filmFromRequest.hasMpa()) {
             filmDB.setMpa(filmFromRequest.getMpa().getId());
         }
         if (filmFromRequest.hasDirectors()) {
-            List<Integer> directorsId = filmFromRequest.getDirectors().stream()
+            Set<Integer> directorsId = filmFromRequest.getDirectors().stream()
                     .map(Director::getId)
-                    .toList();
+                    .collect(Collectors.toSet());
             filmDB.setDirectors(directorsId);
         }
         return filmDB;

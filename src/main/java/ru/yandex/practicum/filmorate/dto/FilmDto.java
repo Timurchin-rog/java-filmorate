@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 
 import java.sql.Date;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -25,7 +24,7 @@ public class FilmDto {
     Integer duration;
     Set<Integer> likes;
     int countLikes;
-    List<Genre> genres;
+    Set<Genre> genres;
     MPA mpa;
-    List<Director> directors;
+    Set<Director> directors;
 }

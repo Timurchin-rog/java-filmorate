@@ -38,16 +38,17 @@ public class DirectorRepository extends BaseRepository<Director> {
         return directorOpt.get();
     }
 
-    public List<Integer> getDirectorsIdOfFilm(int filmId) {
-        Set<Integer> directors = findManyId(FIND_DIRECTORS_ID_OF_FILM, filmId);
-        return new ArrayList<>(directors);
+    public Set<Integer> getDirectorsIdOfFilm(int filmId) {
+        return findManyId(FIND_DIRECTORS_ID_OF_FILM, filmId);
     }
 
-    public List<Director> getDirectorsOfFilm(int filmId) {
-        return findMany(FIND_DIRECTORS_OF_FILM, filmId);
+    public Set<Director> getDirectorsOfFilm(int filmId) {
+        return new HashSet<>(findMany(FIND_DIRECTORS_OF_FILM, filmId));
     }
 
-    public void addDirectorsWithFilm(int filmId, List<Integer> directorsId) {
+    public void addDirectors(int filmId, Set<Integer> directorsId) {
+        if (directorsId.isEmpty())
+            return;
         for (Integer directorId : directorsId) {
             insert(
                     "INSERT INTO films_directors (film_id, director_id) VALUES (?, ?)",
@@ -78,7 +79,7 @@ public class DirectorRepository extends BaseRepository<Director> {
         );
     }
 
-    public void checkDirectors(List<Integer> directorsId) {
+    public void checkDirectors(Set<Integer> directorsId) {
         for (Integer directorId : directorsId) {
             Optional<Director> directorOpt = findOne(FIND_DIRECTOR_BY_ID, directorId);
             if (directorOpt.isEmpty())

@@ -127,13 +127,6 @@ public class FilmRepository extends BaseRepository<FilmDB> {
         }
     }
 
-    public List<FilmDB> getPopularFilms(int count) {
-        return findMany(
-                FIND_POPULAR_FILMS,
-                count
-        );
-    }
-
     public Set<Integer> getLikesId(int filmId) {
         return findManyId(
                 FIND_LIKES,

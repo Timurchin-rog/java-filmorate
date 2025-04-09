@@ -7,7 +7,6 @@ import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.sql.Date;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,9 +20,9 @@ public class Film {
     Integer duration;
     Set<Integer> likes;
     int countLikes;
-    List<Genre> genres;
+    Set<Genre> genres;
     MPA mpa;
-    List<Director> directors;
+    Set<Director> directors;
 
     public boolean hasName() {
         return ! (name == null || name.isBlank());

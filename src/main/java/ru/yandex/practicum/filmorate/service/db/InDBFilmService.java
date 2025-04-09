@@ -50,33 +50,15 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public FilmDto create(Film filmFromRequest) {
-        Film newFilm = filmFromRequest.toBuilder().directors(new ArrayList<>()).build();
+        Film newFilm = filmFromRequest.toBuilder().build();
         FilmDB filmDB = FilmMapper.mapToFilmDB(newFilm);
-
-        Set<Integer> genresId = new HashSet<>();
-        if (filmFromRequest.getGenres() != null) {
-            List<Genre> genres = filmFromRequest.getGenres();
-            genresId = genres.stream()
-                            .map(Genre::getId)
-                            .collect(Collectors.toSet());
-            genreRepository.checkGenres(genresId);
-        }
 
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
             mpaRepository.checkMpa(filmDB.getMpa());
 
-        List<Integer> directorsId = new ArrayList<>();
-        if (filmFromRequest.getDirectors() != null) {
-            List<Director> directors = filmFromRequest.getDirectors();
-            directorsId = directors.stream()
-                    .map(Director::getId)
-                    .toList();
-            directorRepository.checkDirectors(directorsId);
-        }
-
         filmRepository.saveFilm(filmDB);
-        genreRepository.addGenres(filmDB.getId(), genresId);
-        directorRepository.addDirectorsWithFilm(filmDB.getId(), directorsId);
+        genreRepository.addGenres(filmDB.getId(), addGenresInFilm(filmFromRequest));
+        directorRepository.addDirectors(filmDB.getId(), addDirectorsInFilm(filmFromRequest));
         log.info(String.format("Новый фильм id = %d добавлен", filmDB.getId()));
         Film filmForClients = mapToFilm(filmDB);
         return FilmMapper.mapToFilmDto(filmForClients);
@@ -203,6 +185,30 @@ public class InDBFilmService implements FilmService {
                 .toList();
     }
 
+    private Set<Integer> addGenresInFilm(Film filmFromRequest) {
+        Set<Integer> genresId = new HashSet<>();
+        if (filmFromRequest.getGenres() != null) {
+            Set<Genre> genres = filmFromRequest.getGenres();
+            genresId = genres.stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
+            genreRepository.checkGenres(genresId);
+        }
+        return genresId;
+    }
+
+    private Set<Integer> addDirectorsInFilm(Film filmFromRequest) {
+        Set<Integer> directorsId = new HashSet<>();
+        if (filmFromRequest.getDirectors() != null) {
+            Set<Director> directors = filmFromRequest.getDirectors();
+            directorsId = directors.stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet());
+            directorRepository.checkDirectors(directorsId);
+        }
+        return directorsId;
+    }
+
     private Film mapToFilm(FilmDB filmDB) {
         Film film = Film.builder()
                 .id(filmDB.getId())
@@ -268,11 +274,11 @@ public class InDBFilmService implements FilmService {
             throw new IllegalArgumentException("FilmDB cannot be null");
         }
 
-        List<Genre> genres = filmDB.getGenres() != null ?
+        Set<Genre> genres = filmDB.getGenres() != null ?
                 filmDB.getGenres().stream()
                         .map(genreRepository::getGenreById)
                         .filter(Objects::nonNull)
-                        .collect(Collectors.toList()) : new ArrayList<>();
+                        .collect(Collectors.toSet()) : new HashSet<>();
 
         MPA mpa = filmDB.getMpa() != null ?
                 mpaRepository.getMpaById(filmDB.getMpa()) : null;
