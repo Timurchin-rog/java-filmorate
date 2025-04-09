@@ -186,7 +186,7 @@ public class InDBFilmService implements FilmService {
                 .toList();
         if (sortBy.toLowerCase().equals("likes")) {
             return filmsOfDirector.stream()
-                    .sorted(Comparator.comparing(FilmDto::getCountLikes))
+                    .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())
                     .toList();
         } else {
             return filmsOfDirector.stream()
