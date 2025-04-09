@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -19,10 +20,7 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -58,8 +56,8 @@ public class InDBFilmService implements FilmService {
         if (filmFromRequest.getGenres() != null) {
             List<Genre> genres = filmFromRequest.getGenres();
             genresId = genres.stream()
-                            .map(Genre::getId)
-                            .collect(Collectors.toSet());
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
             genreRepository.checkGenres(genresId);
         }
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
@@ -170,5 +168,104 @@ public class InDBFilmService implements FilmService {
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
             film.setMpa(mpaRepository.getMpaById(filmDB.getMpa()));
         return film;
+    }
+
+    @Override
+    public List<FilmDto> searchFilms(String query, String by) {
+        if (by.contains("title")) {
+            List<FilmDB> films = filmRepository.searchFilmsByTitle(query);
+            return films.stream()
+                    .map(this::mapToFilm)
+                    .map(FilmMapper::mapToFilmDto)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<FilmDto> getCommonFilms(int userId, int friendId) {
+        try {
+            List<FilmDB> userFilmsDB = Optional.ofNullable(filmRepository.getFilmsByUserId(userId)).orElse(new ArrayList<>());
+            List<FilmDB> friendFilmsDB = Optional.ofNullable(filmRepository.getFilmsByUserId(friendId)).orElse(new ArrayList<>());
+
+            Set<FilmDto> userFilms = userFilmsDB.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toSet());
+            Set<FilmDto> friendFilms = friendFilmsDB.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toSet());
+
+            userFilms.retainAll(friendFilms);
+
+            if (userFilms.isEmpty()) {
+                log.info("Нет общих фильмов для пользователей {} и {}", userId, friendId);
+                return Collections.emptyList();
+            }
+
+            return userFilms.stream()
+                    .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed()
+                            .thenComparing(FilmDto::getName))
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении общих фильмов для пользователей {} и {}: {}", userId, friendId, e.getMessage());
+            throw new InternalServerException("Не удалось получить общие фильмы");
+        }
+    }
+
+    private FilmDto convertToDto(FilmDB filmDB) {
+        if (filmDB == null) {
+            throw new IllegalArgumentException("FilmDB cannot be null");
+        }
+
+        List<Genre> genres = filmDB.getGenres() != null ?
+                filmDB.getGenres().stream()
+                        .map(genreId -> genreRepository.getGenreById(genreId))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()) : new ArrayList<>();
+
+        MPA mpa = filmDB.getMpa() != null ?
+                mpaRepository.getMpaById(filmDB.getMpa()) : null;
+
+        return FilmDto.builder()
+                .id(filmDB.getId())
+                .name(filmDB.getName())
+                .description(filmDB.getDescription())
+                .releaseDate(filmDB.getReleaseDate())
+                .duration(filmDB.getDuration())
+                .likes(filmDB.getLikes() != null ? new HashSet<>(filmDB.getLikes()) : new HashSet<>())
+                .countLikes(filmDB.getCountLikes())
+                .genres(genres)
+                .mpa(mpa)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> getRecommendedFilms(int userId) {
+        Set<Integer> similarUsers = filmRepository.findSimilarUsers(userId);
+        List<FilmDB> recommendedFilms = filmRepository.findFilmsLikedBySimilarUsers(userId, similarUsers);
+        return recommendedFilms.stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> searchFilmsByTitle(String query) {
+        return filmRepository.searchFilmsByTitle(query).stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> getFilmsByUserId(int userId) {
+        return filmRepository.getFilmsByUserId(userId).stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 }
