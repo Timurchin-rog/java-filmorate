@@ -16,7 +16,7 @@ public class EventRepository {
             "INSERT INTO user_feeds (user_id, event_type, operation, entity_id, event_timestamp) " +
                     "VALUES (?, ?, ?, ?, ?)";
     private static final String SELECT_EVENTS_BY_USER_ID =
-            "SELECT * FROM user_feeds WHERE user_id = ? ORDER BY event_timestamp DESC";
+            "SELECT * FROM user_feeds WHERE user_id = ? ORDER BY event_id ASC";
 
     public void addEvent(Event event) {
         jdbcTemplate.update(
