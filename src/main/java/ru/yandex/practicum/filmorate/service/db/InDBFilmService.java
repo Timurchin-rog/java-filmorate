@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.DirectorRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
@@ -56,8 +57,8 @@ public class InDBFilmService implements FilmService {
         if (filmFromRequest.getGenres() != null) {
             List<Genre> genres = filmFromRequest.getGenres();
             genresId = genres.stream()
-                            .map(Genre::getId)
-                            .collect(Collectors.toSet());
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
             genreRepository.checkGenres(genresId);
         }
 
@@ -286,5 +287,34 @@ public class InDBFilmService implements FilmService {
                 .genres(genres)
                 .mpa(mpa)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> getRecommendedFilms(int userId) {
+        Set<Integer> similarUsers = filmRepository.findSimilarUsers(userId);
+        List<FilmDB> recommendedFilms = filmRepository.findFilmsLikedBySimilarUsers(userId, similarUsers);
+        return recommendedFilms.stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> searchFilmsByTitle(String query) {
+        return filmRepository.searchFilmsByTitle(query).stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FilmDto> getFilmsByUserId(int userId) {
+        return filmRepository.getFilmsByUserId(userId).stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 }

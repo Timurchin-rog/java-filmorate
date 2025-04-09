@@ -2,6 +2,9 @@ package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,19 +19,16 @@ import java.util.stream.Collectors;
 public class FilmRepository extends BaseRepository<FilmDB> {
     private final GenreRepository genreRepository;
     private final DirectorRepository directorRepository;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private static final String FIND_POPULAR_FILMS = "SELECT * FROM films ORDER BY count_likes DESC LIMIT ?";
     private static final String FIND_LIKES = "SELECT user_id FROM films_likes WHERE film_id = ?";
-
-    private static final String INSERT_FILM = "INSERT INTO films(name, description, release_date, duration, " +
-            "count_likes) VALUES (?, ?, ?, ?, ?)";
-    private static final String INSERT_LIKE_OF_FILM = "INSERT INTO films_likes(film_id, user_id) " +
-            "VALUES (?, ?)";
-
-    private static final String UPDATE_FILM = "UPDATE films SET name = ?, description = ?, release_date = ?, " +
-            "duration = ? WHERE id = ?";
+    private static final String SEARCH_FILMS_BY_TITLE = "SELECT * FROM films WHERE LOWER(name) LIKE LOWER(?)";
+    private static final String FIND_FILMS_BY_USER_ID = "SELECT f.* FROM films f JOIN films_likes fl ON f.id = fl.film_id WHERE fl.user_id = ?";
+    private static final String INSERT_FILM = "INSERT INTO films(name, description, release_date, duration, count_likes) VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_LIKE_OF_FILM = "INSERT INTO films_likes(film_id, user_id) VALUES (?, ?)";
+    private static final String UPDATE_FILM = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
     private static final String UPDATE_MPA_FILM = "UPDATE films SET mpa = ? WHERE id = ?";
-
     private static final String DELETE_FILM = "DELETE FROM films WHERE id = ?";
     private static final String DELETE_LIKE_OF_FILM = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
     private static final String DELETE_FILM_FROM_LIKES_LIST = "DELETE FROM films_likes WHERE film_id = ?";
@@ -46,6 +46,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
         super(jdbc, mapper);
         this.genreRepository = genreRepository;
         this.directorRepository = directorRepository;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbc);
     }
 
     public List<FilmDB> getAllFilms() {
@@ -157,5 +158,38 @@ public class FilmRepository extends BaseRepository<FilmDB> {
         return filmDBList.stream()
                 .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
                 .collect(Collectors.toList());
+    }
+
+    public Set<Integer> findSimilarUsers(int userId) {
+        String sql = """
+                SELECT fl2.user_id
+                FROM films_likes fl1
+                JOIN films_likes fl2 ON fl1.film_id = fl2.film_id
+                WHERE fl1.user_id = ? AND fl2.user_id != ?
+                GROUP BY fl2.user_id
+                ORDER BY COUNT(fl2.film_id) DESC
+                LIMIT 5
+                """;
+        return new HashSet<>(jdbc.queryForList(sql, Integer.class, userId, userId));
+    }
+
+    public List<FilmDB> findFilmsLikedBySimilarUsers(int userId, Set<Integer> similarUsers) {
+        if (similarUsers.isEmpty()) {
+            return List.of();
+        }
+        String sql = """
+                SELECT f.* FROM films f
+                JOIN films_likes fl ON f.id = fl.film_id
+                WHERE fl.user_id IN (:similarUsers)
+                AND f.id NOT IN (SELECT film_id FROM films_likes WHERE user_id = :userId)
+                GROUP BY f.id
+                ORDER BY COUNT(fl.user_id) DESC
+                LIMIT 10
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("similarUsers", similarUsers)
+                .addValue("userId", userId);
+
+        return namedParameterJdbcTemplate.query(sql, params, mapper);
     }
 }
