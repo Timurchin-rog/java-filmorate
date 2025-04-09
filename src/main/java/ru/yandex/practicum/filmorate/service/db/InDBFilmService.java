@@ -50,7 +50,7 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public FilmDto create(Film filmFromRequest) {
-        Film newFilm = filmFromRequest.toBuilder().build();
+        Film newFilm = filmFromRequest.toBuilder().directors(new ArrayList<>()).build();
         FilmDB filmDB = FilmMapper.mapToFilmDB(newFilm);
 
         Set<Integer> genresId = new HashSet<>();
@@ -176,6 +176,7 @@ public class InDBFilmService implements FilmService {
         if (directorFromRequest.getId() == null) {
             throw new ValidationException();
         }
+        directorRepository.getDirectorById(directorFromRequest.getId());
         directorRepository.updateDirector(directorFromRequest);
         return directorFromRequest;
     }
