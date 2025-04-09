@@ -190,7 +190,7 @@ public class InDBFilmService implements FilmService {
                     .toList();
         } else {
             return filmsOfDirector.stream()
-                    .sorted(Comparator.comparing(FilmDto::getReleaseDate).reversed())
+                    .sorted(Comparator.comparing(FilmDto::getReleaseDate))
                     .toList();
         }
     }
