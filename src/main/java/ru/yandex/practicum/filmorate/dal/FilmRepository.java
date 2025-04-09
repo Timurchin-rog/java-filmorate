@@ -9,14 +9,18 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
 public class FilmRepository extends BaseRepository<FilmDB> {
     private final GenreRepository genreRepository;
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final DirectorRepository directorRepository;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private static final String FIND_POPULAR_FILMS = "SELECT * FROM films ORDER BY count_likes DESC LIMIT ?";
     private static final String FIND_LIKES = "SELECT user_id FROM films_likes WHERE film_id = ?";
