@@ -193,7 +193,6 @@ public class InDBFilmService implements FilmService {
                     .sorted(Comparator.comparing(FilmDto::getReleaseDate).reversed())
                     .toList();
         }
-
     }
 
     private Set<Integer> checkGenres(Film filmFromRequest) {

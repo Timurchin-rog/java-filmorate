@@ -70,7 +70,7 @@ public class FilmController {
     }
 
     @GetMapping("/director/{id}")
-    public List<FilmDto> findPopularFilms(@PathVariable int id, @RequestParam(defaultValue = "year") String sortBy) {
+    public List<FilmDto> findPopularFilms(@PathVariable int id, @RequestParam() String sortBy) {
         return filmService.findFilmsOfDirector(id, sortBy);
     }
 
