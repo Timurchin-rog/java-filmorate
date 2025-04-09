@@ -188,10 +188,12 @@ public class InDBFilmService implements FilmService {
             return filmsOfDirector.stream()
                     .sorted(Comparator.comparing(FilmDto::getCountLikes))
                     .toList();
+        } else {
+            return filmsOfDirector.stream()
+                    .sorted(Comparator.comparing(FilmDto::getReleaseDate))
+                    .toList();
         }
-        return filmsOfDirector.stream()
-                .sorted(Comparator.comparing(FilmDto::getReleaseDate))
-                .toList();
+
     }
 
     private Set<Integer> checkGenres(Film filmFromRequest) {
