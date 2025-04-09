@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -14,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final FilmService filmService;
     private final String pathFriends = "/{user-id}/friends/{friend-id}";
     private final String pathFriend = "/{user-id}/friends";
 
@@ -63,5 +66,10 @@ public class UserController {
     public List<UserDto> findCommonFriends(@PathVariable(name = "user-id") int userId,
                                            @PathVariable(name = "other-user-id") int otherUserId) {
         return userService.findCommonFriends(userId, otherUserId);
+    }
+
+    @GetMapping("/{user-id}/recommendations")
+    public List<FilmDto> getRecommendations(@PathVariable("user-id") int userId) {
+        return filmService.getRecommendedFilms(userId);
     }
 }

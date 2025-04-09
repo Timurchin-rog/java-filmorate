@@ -74,4 +74,14 @@ public class FilmController {
     public List<FilmDto> findPopularFilms(@PathVariable int id, @RequestParam("year") String sortBy) {
         return filmService.findFilmsOfDirector(id, sortBy);
     }
+
+    @GetMapping("/recommendations")
+    public List<FilmDto> getRecommendations(@RequestParam(name = "user-id") int userId) {
+        return filmService.getRecommendedFilms(userId);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<FilmDto> getFilmsByUser(@PathVariable int userId) {
+        return filmService.getFilmsByUserId(userId);
+    }
 }
