@@ -63,10 +63,8 @@ public class FilmRepository extends BaseRepository<FilmDB> {
         Optional<FilmDB> filmOpt = findOne("SELECT * FROM films WHERE id = ?", filmId);
         if (filmOpt.isEmpty())
             throw new NotFoundException();
-        FilmDB filmDB = filmOpt.get();
-        filmDB.setLikes(getLikesId(filmId));
-        filmDB.setDirectors(directorRepository.getDirectorsIdOfFilm(filmId));
-        return filmDB;
+        filmOpt.get().setLikes(getLikesId(filmId));
+        return filmOpt.get();
     }
 
     public void saveFilm(FilmDB filmDB) {
