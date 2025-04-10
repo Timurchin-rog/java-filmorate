@@ -69,25 +69,25 @@ public class ReviewService {
 
     private void validateUserAndFilm(Integer userId, Integer filmId) {
         if (userRepository.getUserById(userId) == null) {
-            throw new NotFoundException("Пользователь не найден");
+            throw new NotFoundException(String.format("Отзыв с id = %d не найден", userId));
         }
         if (filmRepository.getFilmById(filmId) == null) {
-            throw new NotFoundException("Фильм не найден");
+            throw new NotFoundException(String.format("Фильм с id = %d не найден", filmId));
         }
     }
 
     private void checkUserAndReviewExists(Integer userId, Long reviewId) {
         if (userRepository.getUserById(userId) == null) {
-            throw new NotFoundException("Пользователь не найден");
+            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
         }
         if (reviewRepository.findById(reviewId) == null) {
-            throw new NotFoundException("Отзыв не найден");
+            throw new NotFoundException(String.format("Отзыв с id = %d не найден", reviewId));
         }
     }
 
     private void validateReviewExists(Long reviewId) {
         if (reviewRepository.findById(reviewId) == null) {
-            throw new NotFoundException("Отзыв не найден");
+            throw new NotFoundException(String.format("Отзыв с id = %d не найден", reviewId));
         }
     }
 }
