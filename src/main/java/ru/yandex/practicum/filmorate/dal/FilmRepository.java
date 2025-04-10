@@ -25,6 +25,10 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     private static final String FIND_POPULAR_FILMS = "SELECT * FROM films ORDER BY count_likes DESC LIMIT ?";
     private static final String FIND_LIKES = "SELECT user_id FROM films_likes WHERE film_id = ?";
     private static final String SEARCH_FILMS_BY_TITLE = "SELECT * FROM films WHERE LOWER(name) LIKE LOWER(?)";
+    private static final String SEARCH_FILMS_BY_DIRECTOR = "SELECT f.* FROM films AS f " +
+            "JOIN films_directors AS fd ON f.id = fd.film_id " +
+            "JOIN directors AS d ON fd.director_id = d.id " +
+            "WHERE LOWER(d.name) LIKE LOWER(?)";
     private static final String FIND_FILMS_BY_USER_ID = "SELECT f.* FROM films f JOIN films_likes fl ON f.id = fl.film_id WHERE fl.user_id = ?";
     private static final String INSERT_FILM = "INSERT INTO films(name, description, release_date, duration, count_likes) VALUES (?, ?, ?, ?, ?)";
     private static final String INSERT_LIKE_OF_FILM = "INSERT INTO films_likes(film_id, user_id) VALUES (?, ?)";
@@ -137,6 +141,15 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     public List<FilmDB> searchFilmsByTitle(String query) {
         String searchPattern = "%" + query + "%";
         List<FilmDB> filmDBList = findMany(SEARCH_FILMS_BY_TITLE, searchPattern);
+        return filmDBList.stream()
+                .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
+                .sorted(Comparator.comparing(FilmDB::getCountLikes).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDB> searchFilmsByDirector(String query) {
+        String searchPattern = "%" + query + "%";
+        List<FilmDB> filmDBList = findMany(SEARCH_FILMS_BY_DIRECTOR, searchPattern);
         return filmDBList.stream()
                 .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
                 .sorted(Comparator.comparing(FilmDB::getCountLikes).reversed())
