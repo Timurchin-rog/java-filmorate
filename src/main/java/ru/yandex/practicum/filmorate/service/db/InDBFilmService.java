@@ -117,13 +117,22 @@ public class InDBFilmService implements FilmService {
         if (films.size() < count) {
             count = films.size();
         }
-        if (genreId == 0) {
-            throw new ValidationException();
+        LocalDate yearMin;
+        LocalDate yearMax;
+        if (year != 0) {
+            yearMin = LocalDate.of(year - 1, 12, 31);
+            yearMax = LocalDate.of(year, 12, 31);
+        } else {
+            yearMin = LocalDate.of(1800, 1, 1);
+            yearMax = LocalDate.now();
         }
-        LocalDate yearMin = LocalDate.of(year - 1, 12, 31);
-        LocalDate yearMax = LocalDate.of(year, 12, 31);
         return films.stream()
-                .filter(filmDB -> filmDB.getGenres().contains(genreId))
+                .filter(filmDB -> {
+                    if (genreId != 0)
+                        return filmDB.getGenres().contains(genreId);
+                    else
+                        return true;
+                })
                 .filter(filmDB -> filmDB.getReleaseDate().toLocalDate().isAfter(yearMin)
                         && filmDB.getReleaseDate().toLocalDate().isBefore(yearMax))
                 .map(this::mapToFilm)
