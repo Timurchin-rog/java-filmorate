@@ -45,7 +45,7 @@ public class ReviewRepository {
                 review.getReviewId());
 
         if (updated == 0) {
-            throw new NotFoundException("Review not found with id: " + review.getReviewId());
+            throw new NotFoundException();
         }
         return findById(review.getReviewId());
     }
@@ -59,7 +59,7 @@ public class ReviewRepository {
             String sql = "SELECT * FROM reviews WHERE review_id = ?";
             return jdbcTemplate.queryForObject(sql, new ReviewRowMapper(), reviewId);
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Review not found with id: " + reviewId);
+            throw new NotFoundException();
         }
     }
 

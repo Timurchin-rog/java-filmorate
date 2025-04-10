@@ -87,13 +87,13 @@ public class ReviewService {
 
     private void checkUserExists(Long userId) {
         if (userRepository.getUserById(userId.intValue()) == null) {
-            throw new NotFoundException("User not found with id: " + userId);
+            throw new NotFoundException();
         }
     }
 
     private void checkFilmExists(Long filmId) {
         if (filmRepository.getFilmById(filmId.intValue()) == null) {
-            throw new NotFoundException("Film not found with id: " + filmId);
+            throw new NotFoundException();
         }
     }
 }

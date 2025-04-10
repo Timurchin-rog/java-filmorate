@@ -25,13 +25,13 @@ public class MPARepository extends BaseRepository<MPA> {
     public MPA getMpaById(int mpaId) {
         Optional<MPA> mpaOpt = findOne(FIND_RATING_BY_ID, mpaId);
         if (mpaOpt.isEmpty())
-            throw new NotFoundException(String.format("Возрастной рейтинг id = %d не найден", mpaId));
+            throw new NotFoundException();
         return mpaOpt.get();
     }
 
     public void checkMpa(int mpaId) {
         Optional<MPA> mpaOpt = findOne(FIND_RATING_BY_ID, mpaId);
         if (mpaOpt.isEmpty())
-            throw new NotFoundException(String.format("Возрастной рейтинг id = %d не найден", mpaId));
+            throw new NotFoundException();
     }
 }
