@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS films_genres (
 CREATE TABLE IF NOT EXISTS user_feeds (
     event_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER NOT NULL,
-    event_type ENUM('LIKE', 'REVIEW', 'FRIEND') NOT NULL,
-    operation ENUM('REMOVE', 'ADD', 'UPDATE') NOT NULL,
+    event_type ENUM('LIKE', 'FRIEND') NOT NULL,
+    operation ENUM('ADD', 'REMOVE') NOT NULL,
     entity_id INTEGER NOT NULL,
     event_timestamp BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

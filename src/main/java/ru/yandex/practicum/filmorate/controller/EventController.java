@@ -13,8 +13,8 @@ import java.util.List;
 public class EventController {
     private final EventRepository eventRepository;
 
-    @GetMapping("/{id}/feed")
-    public List<Event> getFeed(@PathVariable int id) {
-        return eventRepository.getEventsByUserId(id);
+    @GetMapping("/{userId}/feed")
+    public List<Event> getFeed(@PathVariable int userId) {
+        return eventRepository.getEventsByUserId(userId);
     }
 }

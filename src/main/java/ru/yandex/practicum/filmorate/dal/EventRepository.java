@@ -18,7 +18,12 @@ public class EventRepository {
     private static final String SELECT_EVENTS_BY_USER_ID =
             "SELECT * FROM user_feeds WHERE user_id = ? ORDER BY event_id ASC";
 
+
     public void addEvent(Event event) {
+        if (event.getUserId() == null || event.getEventType() == null
+                || event.getOperation() == null || event.getEntityId() == null) {
+            throw new IllegalArgumentException("Некорректные данные события");
+        }
         jdbcTemplate.update(
                 INSERT_EVENT,
                 event.getUserId(),
