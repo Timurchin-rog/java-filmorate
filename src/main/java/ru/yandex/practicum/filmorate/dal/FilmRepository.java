@@ -65,10 +65,6 @@ public class FilmRepository extends BaseRepository<FilmDB> {
             throw new NotFoundException();
         filmOpt.get().setLikes(getLikesId(filmId));
         return filmOpt.get();
-        FilmDB filmDB = filmOpt.get();
-        filmDB.setLikes(getLikesId(filmId));
-        filmDB.setDirectors(directorRepository.getDirectorsIdOfFilm(filmId));
-        return filmDB;
     }
 
     public void saveFilm(FilmDB filmDB) {
