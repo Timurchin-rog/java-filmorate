@@ -20,6 +20,7 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,12 +112,20 @@ public class InDBFilmService implements FilmService {
     }
 
     @Override
-    public List<FilmDto> findPopularFilms(int count) {
+    public List<FilmDto> findPopularFilms(int count, int genreId, int year) {
         List<FilmDB> films = filmRepository.getAllFilms();
         if (films.size() < count) {
             count = films.size();
         }
+        if (genreId == 0) {
+            throw new ValidationException();
+        }
+        LocalDate yearMin = LocalDate.of(year - 1, 12, 31);
+        LocalDate yearMax = LocalDate.of(year, 12, 31);
         return films.stream()
+                .filter(filmDB -> filmDB.getGenres().contains(genreId))
+                .filter(filmDB -> filmDB.getReleaseDate().toLocalDate().isAfter(yearMin)
+                        && filmDB.getReleaseDate().toLocalDate().isBefore(yearMax))
                 .map(this::mapToFilm)
                 .map(FilmMapper::mapToFilmDto)
                 .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())
