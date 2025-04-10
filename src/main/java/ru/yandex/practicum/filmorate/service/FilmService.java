@@ -24,7 +24,7 @@ public interface FilmService {
 
     void removeLike(int filmId, int userId);
 
-    List<FilmDto> findPopularFilms(int count);
+    List<FilmDto> findPopularFilms(int count, int genreId, int year);
 
     List<Genre> findAllGenres();
 
