@@ -2,10 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.dal.ReviewRepository;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.ReviewRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
+
 import java.util.List;
 
 @Service
@@ -16,14 +18,19 @@ public class ReviewService {
     private final FilmRepository filmRepository;
 
     public Review create(Review review) {
+        checkUserExists(review.getUserId());
+        checkFilmExists(review.getFilmId());
+        review.setUseful(0);
         return reviewRepository.save(review);
     }
 
     public Review update(Review review) {
+        Review existing = reviewRepository.findById(review.getReviewId());
         return reviewRepository.update(review);
     }
 
     public void delete(Long reviewId) {
+        reviewRepository.findById(reviewId);
         reviewRepository.delete(reviewId);
     }
 
@@ -31,31 +38,62 @@ public class ReviewService {
         return reviewRepository.findById(reviewId);
     }
 
-    public List<Review> getReviews(Integer filmId, int count) {
-        if (filmId == null) {
-            return reviewRepository.findAll(count);
+    public List<Review> getReviews(Long filmId, int count) {
+        return filmId == null ?
+                reviewRepository.findAll(count) :
+                reviewRepository.findByFilmId(filmId, count);
+    }
+
+    public void addLike(Long reviewId, Long userId) {
+        processRating(reviewId, userId, 1);
+    }
+
+    public void addDislike(Long reviewId, Long userId) {
+        processRating(reviewId, userId, -1);
+    }
+
+    public void removeLike(Long reviewId, Long userId) {
+        removeRating(reviewId, userId, 1);
+    }
+
+    public void removeDislike(Long reviewId, Long userId) {
+        removeRating(reviewId, userId, -1);
+    }
+
+    private void processRating(Long reviewId, Long userId, int rating) {
+        checkUserExists(userId);
+        Review review = reviewRepository.findById(reviewId);
+
+        Integer existingRating = reviewRepository.getUserRating(reviewId, userId);
+        if (existingRating != null) {
+            if (existingRating == rating) return;
+            reviewRepository.updateUseful(reviewId, rating - existingRating);
         } else {
-            return reviewRepository.findByFilmId(filmId, count);
+            reviewRepository.updateUseful(reviewId, rating);
+        }
+        reviewRepository.addRating(reviewId, userId, rating);
+    }
+
+    private void removeRating(Long reviewId, Long userId, int rating) {
+        checkUserExists(userId);
+        Review review = reviewRepository.findById(reviewId);
+
+        Integer existingRating = reviewRepository.getUserRating(reviewId, userId);
+        if (existingRating != null && existingRating == rating) {
+            reviewRepository.updateUseful(reviewId, -rating);
+            reviewRepository.removeRating(reviewId, userId);
         }
     }
 
-    public void addLike(Long reviewId, Integer userId) {
-        reviewRepository.addRating(reviewId, userId, 1);
-        reviewRepository.updateUseful(reviewId, 1);
+    private void checkUserExists(Long userId) {
+        if (userRepository.getUserById(userId.intValue()) == null) {
+            throw new NotFoundException("User not found with id: " + userId);
+        }
     }
 
-    public void addDislike(Long reviewId, Integer userId) {
-        reviewRepository.addRating(reviewId, userId, -1);
-        reviewRepository.updateUseful(reviewId, -1);
-    }
-
-    public void removeLike(Long reviewId, Integer userId) {
-        reviewRepository.removeRating(reviewId, userId);
-        reviewRepository.updateUseful(reviewId, -1);
-    }
-
-    public void removeDislike(Long reviewId, Integer userId) {
-        reviewRepository.removeRating(reviewId, userId);
-        reviewRepository.updateUseful(reviewId, 1);
+    private void checkFilmExists(Long filmId) {
+        if (filmRepository.getFilmById(filmId.intValue()) == null) {
+            throw new NotFoundException("Film not found with id: " + filmId);
+        }
     }
 }

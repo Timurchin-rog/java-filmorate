@@ -17,10 +17,10 @@ public class ReviewDto {
     private Boolean isPositive;
 
     @NotNull(message = "userId обязательно")
-    private Integer userId;
+    private Long userId;
 
     @NotNull(message = "filmId обязательно")
-    private Integer filmId;
+    private Long filmId;
 
     private Integer useful;
 }
