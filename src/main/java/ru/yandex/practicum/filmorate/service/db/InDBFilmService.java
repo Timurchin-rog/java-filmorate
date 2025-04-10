@@ -238,15 +238,24 @@ public class InDBFilmService implements FilmService {
 
     @Override
     public List<FilmDto> searchFilms(String query, String by) {
+        List<FilmDB> films = new ArrayList<>();
+
         if (by.contains("title")) {
-            List<FilmDB> films = filmRepository.searchFilmsByTitle(query);
-            return films.stream()
-                    .map(this::mapToFilm)
-                    .map(FilmMapper::mapToFilmDto)
-                    .collect(Collectors.toList());
+            films.addAll(filmRepository.searchFilmsByTitle(query));
         }
-        return Collections.emptyList();
+
+        if (by.contains("director")) {
+            List<FilmDB> filmsByDirector = filmRepository.searchFilmsByDirector(query);
+            films.addAll(filmsByDirector);
+        }
+
+        return films.stream()
+                .map(this::mapToFilm)
+                .map(FilmMapper::mapToFilmDto)
+                .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())
+                .collect(Collectors.toList());
     }
+
 
     @Override
     public Collection<FilmDto> getCommonFilms(int userId, int friendId) {
