@@ -42,7 +42,7 @@ public class UserRepository extends BaseRepository<UserDB> {
     public UserDB getUserById(int userId) {
         Optional<UserDB> userOpt = findOne(FIND_USER_BY_ID, userId);
         if (userOpt.isEmpty())
-            throw new NotFoundException(String.format("Пользователь id = %d не найден", userId));
+            throw new NotFoundException();
         userOpt.get().setFriends(getAllFriendOfUser(userId));
         return userOpt.get();
     }

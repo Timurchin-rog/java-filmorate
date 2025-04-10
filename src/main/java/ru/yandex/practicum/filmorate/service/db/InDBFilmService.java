@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.dal.DirectorRepository;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -28,6 +30,7 @@ public class InDBFilmService implements FilmService {
     private final FilmRepository filmRepository;
     private final GenreRepository genreRepository;
     private final MPARepository mpaRepository;
+    private final DirectorRepository directorRepository;
     private final UserService userService;
 
     @Override
@@ -49,18 +52,15 @@ public class InDBFilmService implements FilmService {
     public FilmDto create(Film filmFromRequest) {
         Film newFilm = filmFromRequest.toBuilder().build();
         FilmDB filmDB = FilmMapper.mapToFilmDB(newFilm);
-        Set<Integer> genresId = new HashSet<>();
-        if (filmFromRequest.getGenres() != null) {
-            List<Genre> genres = filmFromRequest.getGenres();
-            genresId = genres.stream()
-                    .map(Genre::getId)
-                    .collect(Collectors.toSet());
-            genreRepository.checkGenres(genresId);
-        }
+
         if (filmFromRequest.getMpa() != null && filmDB.getMpa() != 0)
             mpaRepository.checkMpa(filmDB.getMpa());
+
         filmRepository.saveFilm(filmDB);
-        genreRepository.addGenres(filmDB.getId(), genresId);
+
+        genreRepository.addGenres(filmDB.getId(), checkGenres(filmFromRequest));
+        directorRepository.addDirectors(filmDB.getId(), checkDirectors(filmFromRequest));
+
         log.info(String.format("Новый фильм id = %d добавлен", filmDB.getId()));
         Film filmForClients = mapToFilm(filmDB);
         return FilmMapper.mapToFilmDto(filmForClients);
@@ -69,11 +69,18 @@ public class InDBFilmService implements FilmService {
     @Override
     public FilmDto update(Film filmFromRequest) {
         if (filmFromRequest.getId() == null) {
-            throw new ValidationException("При обновлении фильма не указан id");
+            throw new ValidationException();
         }
         int filmId = filmFromRequest.getId();
         FilmDB oldFilm = filmRepository.getFilmById(filmId);
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
+
+        Set<Integer> genresId = checkGenres(filmFromRequest);
+        genreRepository.addGenres(updatedOldFilm.getId(), genresId);
+
+        Set<Integer> directorsId = checkDirectors(filmFromRequest);
+        directorRepository.addDirectors(updatedOldFilm.getId(), directorsId);
+
         Film film = mapToFilm(updatedOldFilm);
         FilmDB filmDB = FilmMapper.mapToFilmDB(film);
         filmRepository.updateFilm(filmDB);
@@ -137,6 +144,81 @@ public class InDBFilmService implements FilmService {
         return mpaRepository.getMpaById(mpaId);
     }
 
+    @Override
+    public List<Director> findAllDirectors() {
+        return directorRepository.getAllDirectors();
+    }
+
+    @Override
+    public Director findDirectorById(int directorId) {
+        return directorRepository.getDirectorById(directorId);
+    }
+
+    @Override
+    public Director createDirector(Director directorFromRequest) {
+        directorRepository.saveDirector(directorFromRequest);
+        log.info(String.format("Новый режиссер id = %d добавлен",
+                directorFromRequest.getId()));
+        return directorFromRequest;
+    }
+
+    @Override
+    public Director updateDirector(Director directorFromRequest) {
+        if (directorFromRequest.getId() == null) {
+            throw new ValidationException();
+        }
+        directorRepository.getDirectorById(directorFromRequest.getId());
+        directorRepository.updateDirector(directorFromRequest);
+        return directorFromRequest;
+    }
+
+    @Override
+    public void removeDirector(int directorId) {
+        directorRepository.getDirectorById(directorId);
+        directorRepository.removeDirector(directorId);
+    }
+
+    @Override
+    public List<FilmDto> findFilmsOfDirector(int directorId, String sortBy) {
+        Director director = directorRepository.getDirectorById(directorId);
+        List<FilmDto> filmsOfDirector = findAll().stream()
+                .filter(filmDto -> filmDto.getDirectors().contains(director))
+                .toList();
+        if (sortBy.toLowerCase().equals("likes")) {
+            return filmsOfDirector.stream()
+                    .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())
+                    .toList();
+        } else {
+            return filmsOfDirector.stream()
+                    .sorted(Comparator.comparing(FilmDto::getReleaseDate))
+                    .toList();
+        }
+    }
+
+    private Set<Integer> checkGenres(Film filmFromRequest) {
+        Set<Integer> genresId = new HashSet<>();
+        if (filmFromRequest.getGenres() != null) {
+            Set<Genre> genres = filmFromRequest.getGenres();
+            genresId = genres.stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toSet());
+            genreRepository.checkGenres(genresId);
+        }
+        return genresId;
+    }
+
+    private Set<Integer> checkDirectors(Film filmFromRequest) {
+        Set<Integer> directorsId = new HashSet<>();
+        if (filmFromRequest.getDirectors() != null) {
+            Set<Director> directors = filmFromRequest.getDirectors();
+            directorsId = directors.stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet());
+            directorRepository.checkDirectors(directorsId);
+        }
+        return directorsId;
+    }
+
     private Film mapToFilm(FilmDB filmDB) {
         Film film = Film.builder()
                 .id(filmDB.getId())
@@ -147,6 +229,7 @@ public class InDBFilmService implements FilmService {
                 .likes(filmDB.getLikes())
                 .countLikes(filmDB.getCountLikes())
                 .genres(genreRepository.getGenresOfFilm(filmDB.getId()))
+                .directors(directorRepository.getDirectorsOfFilm(filmDB.getId()))
                 .build();
         if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
             film.setMpa(mpaRepository.getMpaById(filmDB.getMpa()));
@@ -192,7 +275,7 @@ public class InDBFilmService implements FilmService {
 
         } catch (Exception e) {
             log.error("Ошибка при получении общих фильмов для пользователей {} и {}: {}", userId, friendId, e.getMessage());
-            throw new InternalServerException("Не удалось получить общие фильмы");
+            throw new InternalServerException();
         }
     }
 
@@ -203,8 +286,9 @@ public class InDBFilmService implements FilmService {
 
         List<Genre> genres = filmDB.getGenres() != null ?
                 filmDB.getGenres().stream()
-                        .map(genreId -> genreRepository.getGenreById(genreId))
+                        .map(genreRepository::getGenreById)
                         .filter(Objects::nonNull)
+                        .sorted(Comparator.comparing(Genre::getId))
                         .collect(Collectors.toList()) : new ArrayList<>();
 
         MPA mpa = filmDB.getMpa() != null ?
@@ -252,5 +336,3 @@ public class InDBFilmService implements FilmService {
                 .toList();
     }
 }
-//
-

@@ -9,12 +9,17 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
 public class FilmRepository extends BaseRepository<FilmDB> {
     private final GenreRepository genreRepository;
+    private final DirectorRepository directorRepository;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private static final String FIND_POPULAR_FILMS = "SELECT * FROM films ORDER BY count_likes DESC LIMIT ?";
@@ -29,10 +34,15 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     private static final String DELETE_LIKE_OF_FILM = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
     private static final String DELETE_FILM_FROM_LIKES_LIST = "DELETE FROM films_likes WHERE film_id = ?";
     private static final String DELETE_FILM_FROM_GENRES_LIST = "DELETE FROM films_genres WHERE film_id = ?";
+    private static final String DELETE_FILM_FROM_DIRECTORS_LIST = "DELETE FROM films_directors WHERE film_id = ?";
 
-    public FilmRepository(JdbcTemplate jdbc, RowMapper<FilmDB> mapper, GenreRepository genreRepository) {
+    public FilmRepository(JdbcTemplate jdbc,
+                          RowMapper<FilmDB> mapper,
+                          GenreRepository genreRepository,
+                          DirectorRepository directorRepository) {
         super(jdbc, mapper);
         this.genreRepository = genreRepository;
+        this.directorRepository = directorRepository;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbc);
     }
 
@@ -40,6 +50,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
         List<FilmDB> filmDBList = findMany("SELECT * FROM films");
         return filmDBList.stream()
                 .peek(filmDB -> filmDB.setGenres(genreRepository.getGenresIdOfFilm(filmDB.getId())))
+                .peek(filmDB -> filmDB.setDirectors(directorRepository.getDirectorsIdOfFilm(filmDB.getId())))
                 .sorted(Comparator.comparing(FilmDB::getId))
                 .collect(Collectors.toList());
     }
@@ -47,9 +58,11 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     public FilmDB getFilmById(int filmId) {
         Optional<FilmDB> filmOpt = findOne("SELECT * FROM films WHERE id = ?", filmId);
         if (filmOpt.isEmpty())
-            throw new NotFoundException(String.format("Фильм id = %d не найден", filmId));
-        filmOpt.get().setLikes(getLikesId(filmId));
-        return filmOpt.get();
+            throw new NotFoundException();
+        FilmDB filmDB = filmOpt.get();
+        filmDB.setLikes(getLikesId(filmId));
+        filmDB.setDirectors(directorRepository.getDirectorsIdOfFilm(filmId));
+        return filmDB;
     }
 
     public void saveFilm(FilmDB filmDB) {
@@ -80,6 +93,7 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     public void removeFilm(int filmId) {
         delete(DELETE_FILM_FROM_LIKES_LIST, filmId);
         delete(DELETE_FILM_FROM_GENRES_LIST, filmId);
+        delete(DELETE_FILM_FROM_DIRECTORS_LIST, filmId);
         delete(DELETE_FILM, filmId);
     }
 
@@ -111,13 +125,6 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                     countLikes,
                     filmId);
         }
-    }
-
-    public List<FilmDB> getPopularFilms(int count) {
-        return findMany(
-                FIND_POPULAR_FILMS,
-                count
-        );
     }
 
     public Set<Integer> getLikesId(int filmId) {
@@ -176,4 +183,3 @@ public class FilmRepository extends BaseRepository<FilmDB> {
         return namedParameterJdbcTemplate.query(sql, params, mapper);
     }
 }
-
