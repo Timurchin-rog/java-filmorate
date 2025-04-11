@@ -60,6 +60,7 @@ public class InDBUserService implements UserService {
             throw new ValidationException();
         }
         int userId = userFromRequest.getId();
+        userRepository.getUserById(userId);
         if (checkDuplicatedEmail(userFromRequest)) {
             throw new DuplicatedEmailException();
         }

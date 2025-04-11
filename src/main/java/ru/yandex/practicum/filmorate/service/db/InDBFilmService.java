@@ -62,8 +62,11 @@ public class InDBFilmService implements FilmService {
 
         filmRepository.saveFilm(filmDB);
 
-        genreRepository.addGenres(filmDB.getId(), checkGenres(filmFromRequest));
-        directorRepository.addDirectors(filmDB.getId(), checkDirectors(filmFromRequest));
+        if (filmFromRequest.getGenres() != null)
+            genreRepository.addGenres(filmDB.getId(), checkGenres(filmFromRequest));
+
+        if (filmFromRequest.getDirectors() != null)
+            directorRepository.addDirectors(filmDB.getId(), checkDirectors(filmFromRequest));
 
         log.info(String.format("Новый фильм id = %d добавлен", filmDB.getId()));
         Film filmForClients = mapToFilm(filmDB);
@@ -79,11 +82,14 @@ public class InDBFilmService implements FilmService {
         FilmDB oldFilm = filmRepository.getFilmById(filmId);
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
 
-        Set<Integer> genresId = checkGenres(filmFromRequest);
-        genreRepository.addGenres(updatedOldFilm.getId(), genresId);
+        if (filmFromRequest.getGenres() != null)
+            genreRepository.addGenres(updatedOldFilm.getId(), checkGenres(filmFromRequest));
 
-        Set<Integer> directorsId = checkDirectors(filmFromRequest);
-        directorRepository.addDirectors(updatedOldFilm.getId(), directorsId);
+        if (filmFromRequest.getDirectors() != null)
+            directorRepository.addDirectors(updatedOldFilm.getId(), checkDirectors(filmFromRequest));
+
+        if (oldFilm.getMpa() != null)
+            filmRepository.addMPAInFilm(updatedOldFilm);
 
         Film film = mapToFilm(updatedOldFilm);
         FilmDB filmDB = FilmMapper.mapToFilmDB(film);

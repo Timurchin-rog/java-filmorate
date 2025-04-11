@@ -77,8 +77,11 @@ public class FilmRepository extends BaseRepository<FilmDB> {
                 filmDB.getCountLikes()
         );
         filmDB.setId(filmId);
-        if (filmDB.getMpa() != null && filmDB.getMpa() != 0)
-            update(UPDATE_MPA_FILM, filmDB.getMpa(), filmDB.getId());
+        addMPAInFilm(filmDB);
+    }
+
+    public void addMPAInFilm(FilmDB filmDB) {
+        update(UPDATE_MPA_FILM, filmDB.getMpa(), filmDB.getId());
     }
 
     public void updateFilm(FilmDB filmDB) {
