@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS review_ratings (
 
 CREATE TABLE IF NOT EXISTS user_feeds (
     event_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    actor_user_id INTEGER REFERENCES users(id),
-    affected_user_id INTEGER REFERENCES users(id),
+    actor_user_id INTEGER NOT NULL REFERENCES users(id),
+    affected_user_id INTEGER NOT NULL REFERENCES users(id),
     event_type ENUM('LIKE', 'REVIEW', 'FRIEND') NOT NULL,
     operation ENUM('ADD', 'REMOVE', 'UPDATE') NOT NULL,
     entity_id BIGINT NOT NULL,

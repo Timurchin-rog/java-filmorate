@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.db;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -94,6 +95,7 @@ public class InDBUserService implements UserService {
                 .build();
     }
 
+    @Transactional
     @Override
     public void addFriend(int userId, int friendId) {
         UserDB user = userRepository.getUserById(userId);
@@ -109,6 +111,7 @@ public class InDBUserService implements UserService {
                 .build());
     }
 
+    @Transactional
     @Override
     public void removeFriend(int userId, int friendId) {
         UserDB user = userRepository.getUserById(userId);

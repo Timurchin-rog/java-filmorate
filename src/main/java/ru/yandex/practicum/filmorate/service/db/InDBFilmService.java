@@ -98,6 +98,7 @@ public class InDBFilmService implements FilmService {
         filmRepository.removeFilm(filmId);
     }
 
+    @Transactional
     @Override
     public void addLike(int filmId, int userId) {
         FilmDB filmDB = filmRepository.getFilmById(filmId);
@@ -113,6 +114,7 @@ public class InDBFilmService implements FilmService {
                 .build());
     }
 
+    @Transactional
     @Override
     public void removeLike(int filmId, int userId) {
         FilmDB filmDB = filmRepository.getFilmById(filmId);

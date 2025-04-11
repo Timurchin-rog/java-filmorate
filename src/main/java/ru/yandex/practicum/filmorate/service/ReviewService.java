@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.FeedRepository;
@@ -22,16 +23,23 @@ public class ReviewService {
     private final FeedRepository feedRepository;
     private final UserService userService;
 
+    @Transactional
     public Review create(Review review) {
         checkUserExists(review.getUserId());
         checkFilmExists(review.getFilmId());
         review.setUseful(0);
         Review savedReview = reviewRepository.save(review);
-        notifyFriendsAboutReview(savedReview, "ADD");
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(review.getUserId().intValue())
+                .affectedUserId(review.getUserId().intValue())
+                .eventType("REVIEW")
+                .operation("ADD")
+                .entityId(savedReview.getReviewId())
+                .build());
         return savedReview;
     }
 
-
+    @Transactional
     public Review update(Review review) {
         Review existing = reviewRepository.findById(review.getReviewId());
         Review updatedReview = reviewRepository.update(review);
@@ -48,10 +56,17 @@ public class ReviewService {
         return updatedReview;
     }
 
+    @Transactional
     public void delete(Long reviewId) {
         Review review = reviewRepository.findById(reviewId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(review.getUserId().intValue())
+                .affectedUserId(review.getUserId().intValue())
+                .eventType("REVIEW")
+                .operation("REMOVE")
+                .entityId(reviewId)
+                .build());
         reviewRepository.delete(reviewId);
-        notifyFriendsAboutReview(review, "REMOVE");
     }
 
     public Review getById(Long reviewId) {
@@ -117,16 +132,4 @@ public class ReviewService {
         }
     }
 
-    private void notifyFriendsAboutReview(Review review, String operation) {
-        List<UserDto> friends = userService.findAllFriends(review.getUserId().intValue());
-        friends.forEach(friend ->
-                feedRepository.save(FeedEvent.builder()
-                        .actorUserId(review.getUserId().intValue())
-                        .affectedUserId(friend.getId())
-                        .eventType("REVIEW")
-                        .operation(operation)
-                        .entityId(review.getReviewId())
-                        .build())
-        );
-    }
 }
