@@ -47,7 +47,15 @@ public class InDBUserService implements UserService {
         if (checkDuplicatedEmail(userFromRequest)) {
             throw new DuplicatedEmailException();
         }
-        User newUser = userFromRequest.toBuilder().friends(new HashSet<>()).build();
+        if (userFromRequest.getName() == null || userFromRequest.getName().isBlank()) {
+            userFromRequest = userFromRequest.toBuilder()
+                    .name(userFromRequest.getLogin())
+                    .build();
+        }
+        User newUser = userFromRequest.toBuilder()
+                .friends(new HashSet<>())
+                .build();
+
         UserDB userDB = UserMapper.mapToUserDB(newUser);
         userRepository.saveUser(userDB);
         User userForClients = mapToUser(userDB);

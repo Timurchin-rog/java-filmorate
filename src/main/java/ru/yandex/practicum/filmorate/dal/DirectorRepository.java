@@ -32,7 +32,7 @@ public class DirectorRepository extends BaseRepository<Director> {
     }
 
     public Director getDirectorById(int directorId) {
-        Optional<Director> directorOpt  = findOne(FIND_DIRECTOR_BY_ID, directorId);
+        Optional<Director> directorOpt = findOne(FIND_DIRECTOR_BY_ID, directorId);
         if (directorOpt.isEmpty())
             throw new NotFoundException();
         return directorOpt.get();
@@ -87,4 +87,3 @@ public class DirectorRepository extends BaseRepository<Director> {
         }
     }
 }
-
