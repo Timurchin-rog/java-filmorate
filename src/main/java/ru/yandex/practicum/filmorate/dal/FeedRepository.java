@@ -36,7 +36,7 @@ public class FeedRepository {
 
     public List<FeedEvent> findByAffectedUserId(int userId) {
         return jdbcTemplate.query(
-                "SELECT * FROM user_feeds WHERE affected_user_id = ? ORDER BY timestamp DESC",
+                "SELECT * FROM user_feeds WHERE affected_user_id = ? ORDER BY timestamp ASC",
                 rowMapper,
                 userId
         );
