@@ -25,10 +25,10 @@ public class UserDB {
 
         public UserDB.UserDBBuilder email(String email) {
             if (email.contains(" ")) {
-                throw new ValidationException("Имейл не должен содержать пробелы");
+                throw new ValidationException();
             }
             if (!email.contains("@")) {
-                throw new ValidationException("Имейл должен содержать @");
+                throw new ValidationException();
             }
             this.email = email;
             return this;
@@ -36,10 +36,10 @@ public class UserDB {
 
         public UserDB.UserDBBuilder login(String login) {
             if (login == null || login.isBlank()) {
-                throw new ValidationException("Логин не может быть пустым");
+                throw new ValidationException();
             }
             if (login.contains(" ")) {
-                throw new ValidationException("Логин не может содержать пробелы");
+                throw new ValidationException();
             }
             this.login = login;
             return this;
@@ -56,10 +56,10 @@ public class UserDB {
 
         public UserDB.UserDBBuilder birthday(Date birthday) {
             if (birthday == null) {
-                throw new ValidationException("Дата рождения не может быть пустой");
+                throw new ValidationException();
             }
             if (birthday.after(Date.from(Instant.now()))) {
-                throw new ValidationException("Дата рождения не может быть в будущем");
+                throw new ValidationException();
             }
             this.birthday = birthday;
             return this;

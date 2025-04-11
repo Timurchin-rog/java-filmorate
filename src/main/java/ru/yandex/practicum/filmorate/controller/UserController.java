@@ -6,6 +6,9 @@ import ru.yandex.practicum.filmorate.dto.FeedEventDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FeedService;
+import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -17,6 +20,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final FeedService feedService;
+    private final FilmService filmService;
     private final String pathFriends = "/{user-id}/friends/{friend-id}";
     private final String pathFriend = "/{user-id}/friends";
 
