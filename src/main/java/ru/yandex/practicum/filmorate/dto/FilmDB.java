@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.sql.Date;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -20,6 +19,7 @@ public class FilmDB {
     Integer duration;
     Set<Integer> likes;
     int countLikes;
-    List<Integer> genres;
+    Set<Integer> genres;
     Integer mpa;
+    Set<Integer> directors;
 }

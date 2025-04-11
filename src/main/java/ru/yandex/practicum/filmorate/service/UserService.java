@@ -23,5 +23,4 @@ public interface UserService {
     List<UserDto> findAllFriends(int userId);
 
     List<UserDto> findCommonFriends(int userId, int otherUserId);
-
 }

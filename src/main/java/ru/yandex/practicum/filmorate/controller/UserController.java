@@ -2,8 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FeedEventDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.db.FeedService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -14,6 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final FeedService feedService;
+    private final FilmService filmService;
     private final String pathFriends = "/{user-id}/friends/{friend-id}";
     private final String pathFriend = "/{user-id}/friends";
 
@@ -22,7 +27,7 @@ public class UserController {
         return userService.findAll();
     }
 
-    @GetMapping("/{user-Id}")
+    @GetMapping("/{user-id}")
     public UserDto findById(@PathVariable(name = "user-id") int userId) {
         return userService.findById(userId);
     }
@@ -37,7 +42,7 @@ public class UserController {
         return userService.update(newUser);
     }
 
-    @DeleteMapping("/{user-Id}")
+    @DeleteMapping("/{user-id}")
     public void remove(@PathVariable(name = "user-id") int userId) {
         userService.remove(userId);
     }
@@ -63,5 +68,10 @@ public class UserController {
     public List<UserDto> findCommonFriends(@PathVariable(name = "user-id") int userId,
                                            @PathVariable(name = "other-user-id") int otherUserId) {
         return userService.findCommonFriends(userId, otherUserId);
+    }
+
+    @GetMapping("/{user-id}/feed")
+    public List<FeedEventDto> getFeed(@PathVariable("user-id") int userId) {
+        return feedService.getFeed(userId);
     }
 }
