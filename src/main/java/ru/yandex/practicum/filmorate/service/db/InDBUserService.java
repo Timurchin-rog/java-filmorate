@@ -1,13 +1,16 @@
 package ru.yandex.practicum.filmorate.service.db;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FeedRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.DuplicatedEmailException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dto.UserDB;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InDBUserService implements UserService {
     private final UserRepository userRepository;
+    private final FeedRepository feedRepository;
 
     @Override
     public List<UserDto> findAll() {
@@ -91,19 +95,35 @@ public class InDBUserService implements UserService {
                 .build();
     }
 
+    @Transactional
     @Override
     public void addFriend(int userId, int friendId) {
         UserDB user = userRepository.getUserById(userId);
         userRepository.getUserById(friendId);
         userRepository.addFriend(userId, friendId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(userId)
+                .affectedUserId(userId)
+                .eventType("FRIEND")
+                .operation("ADD")
+                .entityId((long) friendId)
+                .build());
         user.getFriends().add(friendId);
     }
 
+    @Transactional
     @Override
     public void removeFriend(int userId, int friendId) {
         UserDB user = userRepository.getUserById(userId);
         userRepository.getUserById(friendId);
         userRepository.removeFriend(userId, friendId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(userId)
+                .affectedUserId(userId)
+                .eventType("FRIEND")
+                .operation("REMOVE")
+                .entityId((long) friendId)
+                .build());
         user.getFriends().remove(friendId);
     }
 
