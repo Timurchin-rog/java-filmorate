@@ -6,6 +6,10 @@ import ru.yandex.practicum.filmorate.dto.FeedEventDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FeedService;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -17,6 +21,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final FeedService feedService;
+    private final FilmService filmService;
     private final String pathFriends = "/{user-id}/friends/{friend-id}";
     private final String pathFriend = "/{user-id}/friends";
 
@@ -71,5 +76,10 @@ public class UserController {
     @GetMapping("/{user-id}/feed")
     public List<FeedEventDto> getFeed(@PathVariable("user-id") int userId) {
         return feedService.getFeed(userId);
+    }
+  
+    @GetMapping("/{user-id}/recommendations")
+    public List<FilmDto> getRecommendations(@PathVariable("user-id") int userId) {
+        return filmService.getRecommendedFilms(userId);
     }
 }

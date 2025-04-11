@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.FeedRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
+import ru.yandex.practicum.filmorate.exception.DuplicatedEmailException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
@@ -44,7 +44,7 @@ public class InDBUserService implements UserService {
     @Override
     public UserDto create(User userFromRequest) {
         if (checkDuplicatedEmail(userFromRequest)) {
-            throw new DuplicatedDataException("Имейл уже используется");
+            throw new DuplicatedEmailException();
         }
         User newUser = userFromRequest.toBuilder().friends(new HashSet<>()).build();
         UserDB userDB = UserMapper.mapToUserDB(newUser);
@@ -56,11 +56,11 @@ public class InDBUserService implements UserService {
     @Override
     public UserDto update(User userFromRequest) {
         if (userFromRequest.getId() == null) {
-            throw new ValidationException("При обновлении пользователя не указан id");
+            throw new ValidationException();
         }
         int userId = userFromRequest.getId();
         if (checkDuplicatedEmail(userFromRequest)) {
-            throw new DuplicatedDataException("Данный имейл уже используется");
+            throw new DuplicatedEmailException();
         }
         UserDB oldUser = userRepository.getUserById(userId);
         UserDB updatedOldUser = UserMapper.updateUserFields(oldUser, userFromRequest);

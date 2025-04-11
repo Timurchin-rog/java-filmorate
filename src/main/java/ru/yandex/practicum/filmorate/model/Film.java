@@ -7,7 +7,6 @@ import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.sql.Date;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,8 +20,9 @@ public class Film {
     Integer duration;
     Set<Integer> likes;
     int countLikes;
-    List<Genre> genres;
+    Set<Genre> genres;
     MPA mpa;
+    Set<Director> directors;
 
     public boolean hasName() {
         return ! (name == null || name.isBlank());
@@ -48,11 +48,15 @@ public class Film {
         return ! (mpa == null);
     }
 
+    public boolean hasDirectors() {
+        return ! (directors == null);
+    }
+
     public static class FilmBuilder {
 
         public Film.FilmBuilder name(String name) {
             if (name == null || name.isBlank()) {
-                throw new ValidationException("Название фильма не может быть пустым");
+                throw new ValidationException();
             }
             this.name = name;
             return this;
@@ -60,10 +64,10 @@ public class Film {
 
         public Film.FilmBuilder description(String description) {
             if (description == null || description.isBlank()) {
-                throw new ValidationException("Описание фильма не может быть пустым");
+                throw new ValidationException();
             }
             if (description.length() > 200) {
-                throw new ValidationException("Максимальная длина описания — 200 символов");
+                throw new ValidationException();
             }
             this.description = description;
             return this;
@@ -71,11 +75,11 @@ public class Film {
 
         public Film.FilmBuilder releaseDate(Date releaseDate) {
             if (releaseDate == null) {
-                throw new ValidationException("Дата релиза не должна быть пустой");
+                throw new ValidationException();
             }
             String cinemaBirthdayStr = "1895-12-28";
             if (releaseDate.compareTo(Date.valueOf(cinemaBirthdayStr)) < 0) {
-                throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+                throw new ValidationException();
             }
             this.releaseDate = releaseDate;
             return this;
@@ -83,10 +87,10 @@ public class Film {
 
         public Film.FilmBuilder duration(Integer duration) {
             if (duration == null) {
-                throw new ValidationException("Продолжительность фильма не должна быть пустой");
+                throw new ValidationException();
             }
             if (duration < 0) {
-                throw new ValidationException("Продолжительность фильма должна быть положительной");
+                throw new ValidationException();
             }
             this.duration = duration;
             return this;

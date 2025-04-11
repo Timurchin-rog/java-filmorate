@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS user_feeds;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS films_genres;
+DROP TABLE IF EXISTS films_directors;
+DROP TABLE IF EXISTS directors;
 DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS films;
 DROP TABLE IF EXISTS ratings;
@@ -36,6 +38,17 @@ CREATE TABLE IF NOT EXISTS films (
 	duration integer NOT NULL,
 	count_likes integer,
 	mpa integer REFERENCES ratings(id)
+);
+
+CREATE TABLE IF NOT EXISTS directors (
+	id integer PRIMARY KEY AUTO_INCREMENT,
+	name varchar(50)
+);
+
+CREATE TABLE IF NOT EXISTS films_directors (
+    id integer PRIMARY KEY AUTO_INCREMENT,
+	film_id integer REFERENCES films(id),
+	director_id integer REFERENCES directors(id)
 );
 
 CREATE TABLE IF NOT EXISTS films_likes (

@@ -35,16 +35,17 @@ public class GenreRepository extends BaseRepository<Genre> {
         return genreOpt.get();
     }
 
-    public List<Integer> getGenresIdOfFilm(int filmId) {
-        Set<Integer> genres = findManyId(FIND_GENRES_ID_OF_FILM, filmId);
-        return new ArrayList<>(genres);
+    public Set<Integer> getGenresIdOfFilm(int filmId) {
+        return findManyId(FIND_GENRES_ID_OF_FILM, filmId);
     }
 
-    public List<Genre> getGenresOfFilm(int filmId) {
-        return findMany(FIND_GENRES_OF_FILM, filmId);
+    public Set<Genre> getGenresOfFilm(int filmId) {
+        return new HashSet<>(findMany(FIND_GENRES_OF_FILM, filmId));
     }
 
     public void addGenres(Integer filmId, Set<Integer> genresId) {
+        if (genresId.isEmpty())
+            return;
         for (Integer genreId : genresId) {
             insert(
                     "INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?)",
