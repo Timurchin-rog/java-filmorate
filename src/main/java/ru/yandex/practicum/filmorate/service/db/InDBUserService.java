@@ -101,7 +101,6 @@ public class InDBUserService implements UserService {
         UserDB user = userRepository.getUserById(userId);
         userRepository.getUserById(friendId);
         userRepository.addFriend(userId, friendId);
-        user.getFriends().add(friendId);
         feedRepository.save(FeedEvent.builder()
                 .actorUserId(userId)
                 .affectedUserId(userId)
@@ -109,6 +108,7 @@ public class InDBUserService implements UserService {
                 .operation("ADD")
                 .entityId((long) friendId)
                 .build());
+        user.getFriends().add(friendId);
     }
 
     @Transactional
@@ -117,7 +117,6 @@ public class InDBUserService implements UserService {
         UserDB user = userRepository.getUserById(userId);
         userRepository.getUserById(friendId);
         userRepository.removeFriend(userId, friendId);
-        user.getFriends().remove(friendId);
         feedRepository.save(FeedEvent.builder()
                 .actorUserId(userId)
                 .affectedUserId(userId)
@@ -125,6 +124,7 @@ public class InDBUserService implements UserService {
                 .operation("REMOVE")
                 .entityId((long) friendId)
                 .build());
+        user.getFriends().remove(friendId);
     }
 
     @Override

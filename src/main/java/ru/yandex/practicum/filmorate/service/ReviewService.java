@@ -43,16 +43,13 @@ public class ReviewService {
     public Review update(Review review) {
         Review existing = reviewRepository.findById(review.getReviewId());
         Review updatedReview = reviewRepository.update(review);
-        List<UserDto> friends = userService.findAllFriends(review.getUserId().intValue());
-        friends.forEach(friend ->
-                feedRepository.save(FeedEvent.builder()
-                        .actorUserId(review.getUserId().intValue())
-                        .affectedUserId(friend.getId())
-                        .eventType("REVIEW")
-                        .operation("UPDATE")
-                        .entityId(review.getReviewId())
-                        .build())
-        );
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(updatedReview.getUserId().intValue())
+                .affectedUserId(updatedReview.getUserId().intValue())
+                .eventType("REVIEW")
+                .operation("UPDATE")
+                .entityId(updatedReview.getReviewId())
+                .build());
         return updatedReview;
     }
 
