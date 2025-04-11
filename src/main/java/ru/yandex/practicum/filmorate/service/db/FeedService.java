@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.db;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
