@@ -2,7 +2,10 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FeedRepository;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.ReviewRepository;
@@ -16,22 +19,39 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final FilmRepository filmRepository;
+    private final FeedRepository feedRepository;
+    private final UserService userService;
 
     public Review create(Review review) {
         checkUserExists(review.getUserId());
         checkFilmExists(review.getFilmId());
         review.setUseful(0);
-        return reviewRepository.save(review);
+        Review savedReview = reviewRepository.save(review);
+        notifyFriendsAboutReview(savedReview, "ADD");
+        return savedReview;
     }
+
 
     public Review update(Review review) {
         Review existing = reviewRepository.findById(review.getReviewId());
-        return reviewRepository.update(review);
+        Review updatedReview = reviewRepository.update(review);
+        List<UserDto> friends = userService.findAllFriends(review.getUserId().intValue());
+        friends.forEach(friend ->
+                feedRepository.save(FeedEvent.builder()
+                        .actorUserId(review.getUserId().intValue())
+                        .affectedUserId(friend.getId())
+                        .eventType("REVIEW")
+                        .operation("UPDATE")
+                        .entityId(review.getReviewId())
+                        .build())
+        );
+        return updatedReview;
     }
 
     public void delete(Long reviewId) {
-        reviewRepository.findById(reviewId);
+        Review review = reviewRepository.findById(reviewId);
         reviewRepository.delete(reviewId);
+        notifyFriendsAboutReview(review, "REMOVE");
     }
 
     public Review getById(Long reviewId) {
@@ -95,5 +115,18 @@ public class ReviewService {
         if (filmRepository.getFilmById(filmId.intValue()) == null) {
             throw new NotFoundException();
         }
+    }
+
+    private void notifyFriendsAboutReview(Review review, String operation) {
+        List<UserDto> friends = userService.findAllFriends(review.getUserId().intValue());
+        friends.forEach(friend ->
+                feedRepository.save(FeedEvent.builder()
+                        .actorUserId(review.getUserId().intValue())
+                        .affectedUserId(friend.getId())
+                        .eventType("REVIEW")
+                        .operation(operation)
+                        .entityId(review.getReviewId())
+                        .build())
+        );
     }
 }

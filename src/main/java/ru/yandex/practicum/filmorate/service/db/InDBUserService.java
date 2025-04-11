@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.service.db;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FeedRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dto.UserDB;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InDBUserService implements UserService {
     private final UserRepository userRepository;
+    private final FeedRepository feedRepository;
 
     @Override
     public List<UserDto> findAll() {
@@ -97,6 +100,13 @@ public class InDBUserService implements UserService {
         userRepository.getUserById(friendId);
         userRepository.addFriend(userId, friendId);
         user.getFriends().add(friendId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(userId)
+                .affectedUserId(userId)
+                .eventType("FRIEND")
+                .operation("ADD")
+                .entityId((long) friendId)
+                .build());
     }
 
     @Override
@@ -105,6 +115,13 @@ public class InDBUserService implements UserService {
         userRepository.getUserById(friendId);
         userRepository.removeFriend(userId, friendId);
         user.getFriends().remove(friendId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(userId)
+                .affectedUserId(userId)
+                .eventType("FRIEND")
+                .operation("REMOVE")
+                .entityId((long) friendId)
+                .build());
     }
 
     @Override

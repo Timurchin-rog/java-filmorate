@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.db;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FeedRepository;
 import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MPARepository;
@@ -10,9 +11,11 @@ import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.service.FeedService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -30,6 +33,7 @@ public class InDBFilmService implements FilmService {
     private final GenreRepository genreRepository;
     private final MPARepository mpaRepository;
     private final UserService userService;
+    private final FeedRepository feedRepository;
 
     @Override
     public List<FilmDto> findAll() {
@@ -94,6 +98,13 @@ public class InDBFilmService implements FilmService {
         userService.findById(userId);
         filmRepository.addLike(filmId, userId);
         filmDB.getLikes().add(userId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(userId)
+                .affectedUserId(userId)
+                .eventType("LIKE")
+                .operation("ADD")
+                .entityId((long) filmId)
+                .build());
     }
 
     @Override
@@ -102,6 +113,13 @@ public class InDBFilmService implements FilmService {
         userService.findById(userId);
         filmRepository.removeLike(filmId, userId);
         filmDB.getLikes().remove(userId);
+        feedRepository.save(FeedEvent.builder()
+                .actorUserId(userId)
+                .affectedUserId(userId)
+                .eventType("LIKE")
+                .operation("REMOVE")
+                .entityId((long) filmId)
+                .build());
     }
 
     @Override

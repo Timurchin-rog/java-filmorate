@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS users_friends;
 DROP TABLE IF EXISTS films_likes;
 DROP TABLE IF EXISTS review_ratings;
 DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS user_feeds;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS films_genres;
 DROP TABLE IF EXISTS genres;
@@ -69,4 +70,14 @@ CREATE TABLE IF NOT EXISTS review_ratings (
     user_id INTEGER REFERENCES users(id),
     rating_type INTEGER CHECK (rating_type IN (1, -1)),
     PRIMARY KEY (review_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_feeds (
+    event_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    actor_user_id INTEGER REFERENCES users(id),
+    affected_user_id INTEGER REFERENCES users(id),
+    event_type ENUM('LIKE', 'REVIEW', 'FRIEND') NOT NULL,
+    operation ENUM('ADD', 'REMOVE', 'UPDATE') NOT NULL,
+    entity_id BIGINT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
