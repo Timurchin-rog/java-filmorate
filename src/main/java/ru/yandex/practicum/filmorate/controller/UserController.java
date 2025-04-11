@@ -77,9 +77,4 @@ public class UserController {
     public List<FeedEventDto> getFeed(@PathVariable("user-id") int userId) {
         return feedService.getFeed(userId);
     }
-  
-    @GetMapping("/{user-id}/recommendations")
-    public List<FilmDto> getRecommendations(@PathVariable("user-id") int userId) {
-        return filmService.getRecommendedFilms(userId);
-    }
 }
