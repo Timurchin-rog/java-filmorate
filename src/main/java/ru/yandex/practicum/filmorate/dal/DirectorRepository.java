@@ -66,6 +66,10 @@ public class DirectorRepository extends BaseRepository<Director> {
         director.setId(id);
     }
 
+    public void deleteDirectorsInFilm(Integer filmId) {
+        jdbc.update("DELETE FROM films_directors WHERE film_id = ?", filmId);
+    }
+
     public void removeDirector(int directorId) {
         delete(DELETE_DIRECTOR_FROM_FILMS_LIST, directorId);
         delete(DELETE_DIRECTOR, directorId);

@@ -83,15 +83,19 @@ public class InDBFilmService implements FilmService {
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
 
         if (filmFromRequest.getGenres() != null) {
-            genreRepository.deleteGenres(filmId);
+            genreRepository.deleteGenresInFilm(filmId);
             genreRepository.addGenres(updatedOldFilm.getId(), checkGenres(filmFromRequest));
         }
 
-        if (filmFromRequest.getDirectors() != null)
-            directorRepository.addDirectors(updatedOldFilm.getId(), checkDirectors(filmFromRequest));
-
         if (oldFilm.getMpa() != null)
             filmRepository.addMPAInFilm(updatedOldFilm);
+
+        if (filmFromRequest.getDirectors() != null ) {
+            directorRepository.deleteDirectorsInFilm(filmId);
+            directorRepository.addDirectors(updatedOldFilm.getId(), checkDirectors(filmFromRequest));
+        } else {
+            directorRepository.deleteDirectorsInFilm(filmId);
+        }
 
         Film film = mapToFilm(updatedOldFilm);
         FilmDB filmDB = FilmMapper.mapToFilmDB(film);

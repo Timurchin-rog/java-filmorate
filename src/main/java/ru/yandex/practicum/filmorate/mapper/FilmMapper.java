@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,6 +77,8 @@ public final class FilmMapper {
                             .map(Genre::getId)
                             .collect(Collectors.toSet());
             filmDB.setGenres(genresId);
+        } else {
+            filmDB.setGenres(new HashSet<>());
         }
         if (filmFromRequest.hasMpa()) {
             filmDB.setMpa(filmFromRequest.getMpa().getId());
@@ -85,6 +88,8 @@ public final class FilmMapper {
                     .map(Director::getId)
                     .collect(Collectors.toSet());
             filmDB.setDirectors(directorsId);
+        } else {
+            filmDB.setDirectors(new HashSet<>());
         }
         return filmDB;
     }
