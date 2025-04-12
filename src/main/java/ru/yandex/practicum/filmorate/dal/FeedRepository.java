@@ -34,6 +34,10 @@ public class FeedRepository {
                 event.getEntityId());
     }
 
+    public void removeAllFeedsOfUser(int userId) {
+        jdbcTemplate.update("DELETE FROM user_feeds WHERE actor_user_id = ?", userId);
+    }
+
     public List<FeedEvent> findByAffectedUserId(int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM user_feeds WHERE affected_user_id = ? ORDER BY timestamp ASC",

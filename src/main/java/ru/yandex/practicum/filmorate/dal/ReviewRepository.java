@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mappers.ReviewRowMapper;
+import ru.yandex.practicum.filmorate.dto.UserDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 
@@ -52,6 +53,11 @@ public class ReviewRepository {
 
     public void delete(Long reviewId) {
         jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", reviewId);
+    }
+
+    public void removeReviewsOfUser(int userId) {
+        jdbcTemplate.update("DELETE FROM review_ratings WHERE user_id = ?", userId);
+        jdbcTemplate.update("DELETE FROM reviews WHERE user_id = ?", userId);
     }
 
     public Review findById(Long reviewId) {
