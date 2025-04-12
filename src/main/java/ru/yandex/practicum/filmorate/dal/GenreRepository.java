@@ -55,6 +55,10 @@ public class GenreRepository extends BaseRepository<Genre> {
         }
     }
 
+    public void deleteGenres(Integer filmId) {
+        jdbc.update("DELETE FROM films_genres WHERE film_id = ?", filmId);
+    }
+
     public void checkGenres(Set<Integer> genresId) {
         for (Integer genreId : genresId) {
             Optional<Genre> genreOpt = findOne(FIND_GENRE_BY_ID, genreId);

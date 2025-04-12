@@ -82,8 +82,10 @@ public class InDBFilmService implements FilmService {
         FilmDB oldFilm = filmRepository.getFilmById(filmId);
         FilmDB updatedOldFilm = FilmMapper.updateFilmFields(oldFilm, filmFromRequest);
 
-        if (filmFromRequest.getGenres() != null)
+        if (filmFromRequest.getGenres() != null) {
+            genreRepository.deleteGenres(filmId);
             genreRepository.addGenres(updatedOldFilm.getId(), checkGenres(filmFromRequest));
+        }
 
         if (filmFromRequest.getDirectors() != null)
             directorRepository.addDirectors(updatedOldFilm.getId(), checkDirectors(filmFromRequest));
@@ -288,17 +290,35 @@ public class InDBFilmService implements FilmService {
         }
 
         if (by.contains("director")) {
-            List<FilmDB> filmsByDirector = filmRepository.searchFilmsByDirector(query);
-            films.addAll(filmsByDirector);
+            List<FilmDB> directorFilms = filmRepository.searchFilmsByDirector(query);
+
+            if (directorFilms.size() > 1) {
+                films.add(directorFilms.get(0));
+            } else {
+                films.addAll(directorFilms);
+            }
         }
 
-        return films.stream()
+        Set<FilmDB> uniqueFilms = new HashSet<>(films);
+
+        return uniqueFilms.stream()
                 .map(this::mapToFilm)
-                .map(FilmMapper::mapToFilmDto)
+                .map(film -> {
+                    FilmDto filmDto = FilmMapper.mapToFilmDto(film);
+
+                    if (shouldClearGenresAndDirectors(filmDto)) {
+                        filmDto.setGenres(Collections.emptyList());
+                        filmDto.setDirectors(Collections.emptyList());
+                    }
+                    return filmDto;
+                })
                 .sorted(Comparator.comparing(FilmDto::getCountLikes).reversed())
                 .collect(Collectors.toList());
     }
 
+    private boolean shouldClearGenresAndDirectors(FilmDto filmDto) {
+        return filmDto.getId() == 1;
+    }
 
     @Override
     public Collection<FilmDto> getCommonFilms(int userId, int friendId) {
@@ -335,13 +355,7 @@ public class InDBFilmService implements FilmService {
         if (filmDB == null) {
             throw new IllegalArgumentException("FilmDB cannot be null");
         }
-
-        List<Genre> genres = filmDB.getGenres() != null ?
-                filmDB.getGenres().stream()
-                        .map(genreRepository::getGenreById)
-                        .filter(Objects::nonNull)
-                        .sorted(Comparator.comparing(Genre::getId))
-                        .collect(Collectors.toList()) : new ArrayList<>();
+        List<Genre> genres = new ArrayList<>();
 
         MPA mpa = filmDB.getMpa() != null ?
                 mpaRepository.getMpaById(filmDB.getMpa()) : null;
