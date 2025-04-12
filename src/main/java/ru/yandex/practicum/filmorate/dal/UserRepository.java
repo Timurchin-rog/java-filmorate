@@ -26,8 +26,9 @@ public class UserRepository extends BaseRepository<UserDB> {
     private static final String DELETE_USER = "DELETE FROM users WHERE id = ?";
     private static final String INSERT_FRIEND_OF_USER = "INSERT INTO users_friends(user_id, friend_id) " +
             "VALUES (?, ?)";
-    private static final String DELETE_FRIEND_OF_USER = "DELETE FROM users_friends WHERE user_id = ? OR friend_id = ?";
-    private static final String FIND_ALL_FRIEND_OF_USER = "SELECT friend_id FROM users_friends WHERE user_id = ?";
+    private static final String DELETE_USER_FROM_FRIENDS_LIST = "DELETE FROM users_friends WHERE user_id = ? OR friend_id = ?";
+    private static final String DELETE_FRIEND_OF_USER = "DELETE FROM users_friends WHERE user_id = ? AND friend_id = ?";
+    private static final String FIND_ALL_FRIENDS_OF_USER = "SELECT friend_id FROM users_friends WHERE user_id = ?";
 
     public UserRepository(JdbcTemplate jdbc,
                           RowMapper<UserDB> mapper,
@@ -77,7 +78,7 @@ public class UserRepository extends BaseRepository<UserDB> {
     }
 
     public void removeUser(int userId) {
-        removeAllFriendOfUser(getUserById(userId));
+        removeUserFromFriendsList(getUserById(userId));
         reviewRepository.removeReviewsOfUser(userId);
         feedRepository.removeAllFeedsOfUser(userId);
         delete(DELETE_USER, userId);
@@ -91,21 +92,17 @@ public class UserRepository extends BaseRepository<UserDB> {
         );
     }
 
-    private void removeAllFriendOfUser(UserDB userDB) {
+    private void removeUserFromFriendsList(UserDB userDB) {
         if (userDB.getFriends().isEmpty())
             return;
-        delete(DELETE_FRIEND_OF_USER, userDB.getId(), userDB.getId());
+        delete(DELETE_USER_FROM_FRIENDS_LIST, userDB.getId(), userDB.getId());
     }
 
     public void removeFriend(int userId, int friendId) {
-        delete(
-                DELETE_FRIEND_OF_USER,
-                userId,
-                friendId
-        );
+        delete(DELETE_FRIEND_OF_USER, userId, friendId);
     }
 
     public Set<Integer> getAllFriendOfUser(int userId) {
-        return findManyId(FIND_ALL_FRIEND_OF_USER, userId);
+        return findManyId(FIND_ALL_FRIENDS_OF_USER, userId);
     }
 }
