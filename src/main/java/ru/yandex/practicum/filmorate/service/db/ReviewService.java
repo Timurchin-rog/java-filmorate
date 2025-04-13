@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.FeedRepository;
+import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -64,6 +65,12 @@ public class ReviewService {
                 .entityId(reviewId)
                 .build());
         reviewRepository.delete(reviewId);
+        try {
+            reviewRepository.findById(reviewId);
+            throw new InternalServerException();
+        } catch (NotFoundException ignored) {
+        }
+
     }
 
     public Review getById(Long reviewId) {

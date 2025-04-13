@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
+
 import java.util.List;
 
 @Repository
@@ -35,14 +36,11 @@ public class FeedRepository {
     }
 
     public void removeAllFeedsOfUser(int userId) {
-        jdbcTemplate.update("DELETE FROM user_feeds WHERE actor_user_id = ?", userId);
+        jdbcTemplate.update("DELETE FROM user_feeds WHERE actor_user_id = ? OR affected_user_id = ?", userId, userId);
     }
 
     public List<FeedEvent> findByAffectedUserId(int userId) {
         return jdbcTemplate.query(
-                "SELECT * FROM user_feeds WHERE affected_user_id = ? ORDER BY timestamp ASC",
-                rowMapper,
-                userId
-        );
+                "SELECT * FROM user_feeds WHERE affected_user_id = ? ORDER BY timestamp ASC", rowMapper, userId);
     }
 }

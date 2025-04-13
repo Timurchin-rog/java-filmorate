@@ -51,7 +51,11 @@ public class ReviewRepository {
     }
 
     public void delete(Long reviewId) {
-        jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", reviewId);
+        jdbcTemplate.update("DELETE FROM review_ratings WHERE review_id = ?", reviewId);
+        int updated = jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", reviewId);
+        if (updated == 0) {
+            throw new NotFoundException();
+        }
     }
 
     public void removeReviewsOfUser(int userId) {
