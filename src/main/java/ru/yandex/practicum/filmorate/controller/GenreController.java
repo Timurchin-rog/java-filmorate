@@ -21,8 +21,8 @@ public class GenreController {
         return filmService.findAllGenres();
     }
 
-    @GetMapping("/{genre-id}")
-    public Genre findById(@PathVariable(name = "genre-id") int genreId) {
-        return filmService.findGenreById(genreId);
+    @GetMapping("/{id}")
+    public Genre findById(@PathVariable int id) {
+        return filmService.findGenreById(id);
     }
 }

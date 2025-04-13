@@ -21,8 +21,8 @@ public class MPAController {
         return filmService.findAllMPA();
     }
 
-    @GetMapping("/{mpa-id}")
-    public MPA findMPAById(@PathVariable(name = "mpa-id") int mpaId) {
-        return filmService.findMPAById(mpaId);
+    @GetMapping("/{id}")
+    public MPA findMPAById(@PathVariable int id) {
+        return filmService.findMPAById(id);
     }
 }
