@@ -40,7 +40,7 @@ public class ReviewService {
 
     @Transactional
     public Review update(Review review) {
-        Review existing = reviewRepository.findById(review.getReviewId());
+        reviewRepository.findById(review.getReviewId());
         Review updatedReview = reviewRepository.update(review);
         feedRepository.save(FeedEvent.builder()
                 .actorUserId(updatedReview.getUserId().intValue())
@@ -99,7 +99,7 @@ public class ReviewService {
 
     private void processRating(Long reviewId, Long userId, int rating) {
         checkUserExists(userId);
-        Review review = reviewRepository.findById(reviewId);
+        reviewRepository.findById(reviewId);
 
         Integer existingRating = reviewRepository.getUserRating(reviewId, userId);
         if (existingRating != null) {
@@ -113,7 +113,7 @@ public class ReviewService {
 
     private void removeRating(Long reviewId, Long userId, int rating) {
         checkUserExists(userId);
-        Review review = reviewRepository.findById(reviewId);
+        reviewRepository.findById(reviewId);
 
         Integer existingRating = reviewRepository.getUserRating(reviewId, userId);
         if (existingRating != null && existingRating == rating) {

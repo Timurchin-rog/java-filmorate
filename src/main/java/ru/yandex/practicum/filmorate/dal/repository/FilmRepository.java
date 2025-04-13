@@ -23,7 +23,6 @@ public class FilmRepository extends BaseRepository<FilmDB> {
     private final DirectorRepository directorRepository;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private static final String FIND_POPULAR_FILMS = "SELECT * FROM films ORDER BY count_likes DESC LIMIT ?";
     private static final String FIND_LIKES = "SELECT user_id FROM films_likes WHERE film_id = ?";
     private static final String SEARCH_FILMS_BY_TITLE = "SELECT * FROM films WHERE LOWER(name) LIKE LOWER(?)";
     private static final String SEARCH_FILMS_BY_DIRECTOR = "SELECT f.* FROM films AS f " +
