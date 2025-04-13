@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service.db;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FeedEventDto;
-import ru.yandex.practicum.filmorate.dal.FeedRepository;
+import ru.yandex.practicum.filmorate.dal.repository.FeedRepository;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.service.UserService;
 

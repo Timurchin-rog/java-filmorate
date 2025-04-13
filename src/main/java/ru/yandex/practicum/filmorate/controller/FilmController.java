@@ -77,8 +77,8 @@ public class FilmController {
     }
 
 
-    @GetMapping("/user/{userId}")
-    public List<FilmDto> getFilmsByUser(@PathVariable int userId) {
+    @GetMapping("/user/{user-id}")
+    public List<FilmDto> getFilmsByUser(@PathVariable(name = "user-id") int userId) {
         return filmService.getFilmsByUserId(userId);
     }
 }

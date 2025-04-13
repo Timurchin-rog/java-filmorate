@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder(toBuilder = true)
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Director {
     Integer id;

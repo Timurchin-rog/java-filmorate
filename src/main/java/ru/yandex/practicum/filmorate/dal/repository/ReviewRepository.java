@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;

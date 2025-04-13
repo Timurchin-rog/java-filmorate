@@ -3,15 +3,14 @@ package ru.yandex.practicum.filmorate.service.db;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.FeedRepository;
+import ru.yandex.practicum.filmorate.dal.repository.FeedRepository;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.dal.FilmRepository;
-import ru.yandex.practicum.filmorate.dal.ReviewRepository;
-import ru.yandex.practicum.filmorate.dal.UserRepository;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.repository.ReviewRepository;
+import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
 
 import java.util.List;
 
@@ -22,7 +21,6 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final FilmRepository filmRepository;
     private final FeedRepository feedRepository;
-    private final UserService userService;
 
     @Transactional
     public Review create(Review review) {

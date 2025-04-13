@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.BaseRepository;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 

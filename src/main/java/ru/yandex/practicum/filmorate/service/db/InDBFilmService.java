@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.dal.*;
+import ru.yandex.practicum.filmorate.dal.repository.*;
 import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;

@@ -27,13 +27,13 @@ public class ReviewController {
         return reviewService.update(convertToEntity(reviewDto));
     }
 
-    @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+    @PutMapping("/{id}/like/{user-id}")
+    public void addLike(@PathVariable Long id, @PathVariable(name = "user-id") Long userId) {
         reviewService.addLike(id, userId);
     }
 
-    @PutMapping("/{id}/dislike/{userId}")
-    public void addDislike(@PathVariable Long id, @PathVariable Long userId) {
+    @PutMapping("/{id}/dislike/{user-id}")
+    public void addDislike(@PathVariable Long id, @PathVariable(name = "user-id") Long userId) {
         reviewService.addDislike(id, userId);
     }
 
@@ -43,13 +43,13 @@ public class ReviewController {
         reviewService.delete(id);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+    @DeleteMapping("/{id}/like/{user-id}")
+    public void removeLike(@PathVariable Long id, @PathVariable(name = "user-id") Long userId) {
         reviewService.removeLike(id, userId);
     }
 
-    @DeleteMapping("/{id}/dislike/{userId}")
-    public void removeDislike(@PathVariable Long id, @PathVariable Long userId) {
+    @DeleteMapping("/{id}/dislike/{user-id}")
+    public void removeDislike(@PathVariable Long id, @PathVariable(name = "user-id") Long userId) {
         reviewService.removeDislike(id, userId);
     }
 
