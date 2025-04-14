@@ -5,8 +5,11 @@ import ru.yandex.practicum.filmorate.dto.FilmDB;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Director;
 
-import java.util.List;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -23,10 +26,16 @@ public final class FilmMapper {
         if (film.getMpa() != null)
             filmDB.setMpa(film.getMpa().getId());
         if (film.getGenres() != null) {
-            List<Integer> genres = film.getGenres().stream()
+            Set<Integer> genresId = film.getGenres().stream()
                     .map(Genre::getId)
-                    .collect(Collectors.toList());
-            filmDB.setGenres(genres);
+                    .collect(Collectors.toSet());
+            filmDB.setGenres(genresId);
+        }
+        if (film.getDirectors() != null) {
+            Set<Integer> directorsId = film.getDirectors().stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet());
+            filmDB.setDirectors(directorsId);
         }
         return filmDB;
     }
@@ -40,33 +49,48 @@ public final class FilmMapper {
                 .duration(film.getDuration())
                 .likes(film.getLikes())
                 .countLikes(film.getCountLikes())
-                .genres(film.getGenres())
+                .genres(film.getGenres().stream()
+                        .sorted(Comparator.comparing(Genre::getId))
+                        .toList())
                 .mpa(film.getMpa())
+                .directors(film.getDirectors().stream()
+                        .sorted(Comparator.comparing(Director::getId))
+                        .toList())
                 .build();
     }
 
-    public static FilmDB updateFilmFields(FilmDB film, Film filmFromRequest) {
+    public static FilmDB updateFilmFields(FilmDB filmDB, Film filmFromRequest) {
         if (filmFromRequest.hasName()) {
-            film.setName(filmFromRequest.getName());
+            filmDB.setName(filmFromRequest.getName());
         }
         if (filmFromRequest.hasDescription()) {
-            film.setDescription(filmFromRequest.getDescription());
+            filmDB.setDescription(filmFromRequest.getDescription());
         }
         if (filmFromRequest.hasReleaseDate()) {
-            film.setReleaseDate(filmFromRequest.getReleaseDate());
+            filmDB.setReleaseDate(filmFromRequest.getReleaseDate());
         }
         if (filmFromRequest.hasDuration()) {
-            film.setDuration(filmFromRequest.getDuration());
+            filmDB.setDuration(filmFromRequest.getDuration());
         }
-        if (filmFromRequest.hasGenres()) {
-            List<Integer> genresId = filmFromRequest.getGenres().stream()
+        if (filmFromRequest.hasGenres() && !filmFromRequest.getGenres().isEmpty()) {
+            Set<Integer> genresId = filmFromRequest.getGenres().stream()
                             .map(Genre::getId)
-                            .toList();
-            film.setGenres(genresId);
+                            .collect(Collectors.toSet());
+            filmDB.setGenres(genresId);
+        } else {
+            filmDB.setGenres(new HashSet<>());
         }
         if (filmFromRequest.hasMpa()) {
-            film.setMpa(filmFromRequest.getMpa().getId());
+            filmDB.setMpa(filmFromRequest.getMpa().getId());
         }
-        return film;
+        if (filmFromRequest.hasDirectors() && !filmFromRequest.getDirectors().isEmpty()) {
+            Set<Integer> directorsId = filmFromRequest.getDirectors().stream()
+                    .map(Director::getId)
+                    .collect(Collectors.toSet());
+            filmDB.setDirectors(directorsId);
+        } else {
+            filmDB.setDirectors(new HashSet<>());
+        }
+        return filmDB;
     }
 }

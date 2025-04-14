@@ -1,8 +1,9 @@
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.BaseRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -31,36 +32,39 @@ public class GenreRepository extends BaseRepository<Genre> {
     public Genre getGenreById(int genreId) {
         Optional<Genre> genreOpt = findOne(FIND_GENRE_BY_ID, genreId);
         if (genreOpt.isEmpty())
-            throw new NotFoundException(String.format("Возрастной рейтинг id = %d не найден", genreId));
+            throw new NotFoundException();
         return genreOpt.get();
     }
 
-    public List<Integer> getGenresIdOfFilm(int filmId) {
-        Set<Integer> genres = findManyId(FIND_GENRES_ID_OF_FILM, filmId);
-        return new ArrayList<>(genres);
+    public Set<Integer> getGenresIdOfFilm(int filmId) {
+        return findManyId(FIND_GENRES_ID_OF_FILM, filmId);
     }
 
-    public List<Genre> getGenresOfFilm(int filmId) {
-        return findMany(FIND_GENRES_OF_FILM, filmId);
+    public Set<Genre> getGenresOfFilm(int filmId) {
+        return new HashSet<>(findMany(FIND_GENRES_OF_FILM, filmId));
     }
 
     public void addGenres(Integer filmId, Set<Integer> genresId) {
+        if (genresId.isEmpty())
+            return;
         for (Integer genreId : genresId) {
             insert(
                     "INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?)",
                     filmId,
                     genreId
             );
-
         }
     }
 
-    public boolean isExistGenres(Set<Integer> genresId) {
+    public void deleteGenresInFilm(Integer filmId) {
+        jdbc.update("DELETE FROM films_genres WHERE film_id = ?", filmId);
+    }
+
+    public void checkGenres(Set<Integer> genresId) {
         for (Integer genreId : genresId) {
             Optional<Genre> genreOpt = findOne(FIND_GENRE_BY_ID, genreId);
             if (genreOpt.isEmpty())
-                throw new NotFoundException(String.format("Возрастной рейтинг id = %d не найден", genreId));
+                throw new NotFoundException();
         }
-        return true;
     }
 }

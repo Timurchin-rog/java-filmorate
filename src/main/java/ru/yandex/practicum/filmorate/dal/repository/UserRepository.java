@@ -1,8 +1,9 @@
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.BaseRepository;
 import ru.yandex.practicum.filmorate.dto.UserDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
@@ -14,6 +15,9 @@ import java.util.stream.Collectors;
 
 @Repository
 public class UserRepository extends BaseRepository<UserDB> {
+    private final ReviewRepository reviewRepository;
+    private final FeedRepository feedRepository;
+
     private static final String FIND_ALL_USERS = "SELECT * FROM users";
     private static final String FIND_USER_BY_ID = "SELECT * FROM users WHERE id = ?";
     private static final String INSERT_USER = "INSERT INTO users(email, login, name, birthday) " +
@@ -23,11 +27,17 @@ public class UserRepository extends BaseRepository<UserDB> {
     private static final String DELETE_USER = "DELETE FROM users WHERE id = ?";
     private static final String INSERT_FRIEND_OF_USER = "INSERT INTO users_friends(user_id, friend_id) " +
             "VALUES (?, ?)";
+    private static final String DELETE_USER_FROM_FRIENDS_LIST = "DELETE FROM users_friends WHERE user_id = ? OR friend_id = ?";
     private static final String DELETE_FRIEND_OF_USER = "DELETE FROM users_friends WHERE user_id = ? AND friend_id = ?";
-    private static final String FIND_ALL_FRIEND_OF_USER = "SELECT friend_id FROM users_friends WHERE user_id = ?";
+    private static final String FIND_ALL_FRIENDS_OF_USER = "SELECT friend_id FROM users_friends WHERE user_id = ?";
 
-    public UserRepository(JdbcTemplate jdbc, RowMapper<UserDB> mapper) {
+    public UserRepository(JdbcTemplate jdbc,
+                          RowMapper<UserDB> mapper,
+                          ReviewRepository reviewRepository,
+                          FeedRepository feedRepository) {
         super(jdbc, mapper);
+        this.reviewRepository = reviewRepository;
+        this.feedRepository = feedRepository;
     }
 
     public List<UserDB> getAllUsers() {
@@ -40,12 +50,10 @@ public class UserRepository extends BaseRepository<UserDB> {
 
     public UserDB getUserById(int userId) {
         Optional<UserDB> userOpt = findOne(FIND_USER_BY_ID, userId);
-        if (userOpt.isPresent()) {
-            userOpt.get().setFriends(getAllFriendOfUser(userId));
-            return userOpt.get();
-        } else {
-            throw new NotFoundException(String.format("Фильм id = %d не найден", userId));
-        }
+        if (userOpt.isEmpty())
+            throw new NotFoundException();
+        userOpt.get().setFriends(getAllFriendOfUser(userId));
+        return userOpt.get();
     }
 
     public void saveUser(UserDB user) {
@@ -71,6 +79,9 @@ public class UserRepository extends BaseRepository<UserDB> {
     }
 
     public void removeUser(int userId) {
+        removeUserFromFriendsList(getUserById(userId));
+        reviewRepository.removeReviewsOfUser(userId);
+        feedRepository.removeAllFeedsOfUser(userId);
         delete(DELETE_USER, userId);
     }
 
@@ -80,21 +91,19 @@ public class UserRepository extends BaseRepository<UserDB> {
                 userId,
                 friendId
         );
-        UserDB userDB = getUserById(userId);
-        userDB.setFriends(getAllFriendOfUser(userId));
+    }
+
+    private void removeUserFromFriendsList(UserDB userDB) {
+        if (userDB.getFriends().isEmpty())
+            return;
+        delete(DELETE_USER_FROM_FRIENDS_LIST, userDB.getId(), userDB.getId());
     }
 
     public void removeFriend(int userId, int friendId) {
-        delete(
-                DELETE_FRIEND_OF_USER,
-                userId,
-                friendId
-        );
-        UserDB userDB = getUserById(userId);
-        userDB.setFriends(getAllFriendOfUser(userId));
+        delete(DELETE_FRIEND_OF_USER, userId, friendId);
     }
 
     public Set<Integer> getAllFriendOfUser(int userId) {
-        return findManyId(FIND_ALL_FRIEND_OF_USER, userId);
+        return findManyId(FIND_ALL_FRIENDS_OF_USER, userId);
     }
 }

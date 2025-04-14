@@ -2,8 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FeedEventDto;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.db.FeedService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -14,17 +18,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final String pathFriends = "/{user-id}/friends/{friend-id}";
-    private final String pathFriend = "/{user-id}/friends";
+    private final FeedService feedService;
+    private final FilmService filmService;
+    private final String pathFriends = "/{id}/friends/{friend-id}";
+    private final String pathFriend = "/{id}/friends";
 
     @GetMapping
     public Collection<UserDto> findAll() {
         return userService.findAll();
     }
 
-    @GetMapping("/{user-Id}")
-    public UserDto findById(@PathVariable(name = "user-id") int userId) {
-        return userService.findById(userId);
+    @GetMapping("/{id}")
+    public UserDto findById(@PathVariable int id) {
+        return userService.findById(id);
     }
 
     @PostMapping
@@ -37,31 +43,41 @@ public class UserController {
         return userService.update(newUser);
     }
 
-    @DeleteMapping("/{user-Id}")
-    public void remove(@PathVariable(name = "user-id") int userId) {
-        userService.remove(userId);
+    @DeleteMapping("/{id}")
+    public void remove(@PathVariable int id) {
+        userService.remove(id);
     }
 
     @PutMapping(pathFriends)
-    public void addFriend(@PathVariable(name = "user-id") int userId,
+    public void addFriend(@PathVariable int id,
                           @PathVariable(name = "friend-id") int friendId) {
-        userService.addFriend(userId, friendId);
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping(pathFriends)
-    public void removeFriend(@PathVariable(name = "user-id") int userId,
+    public void removeFriend(@PathVariable int id,
                              @PathVariable(name = "friend-id") int friendId) {
-        userService.removeFriend(userId, friendId);
+        userService.removeFriend(id, friendId);
     }
 
     @GetMapping(pathFriend)
-    public List<UserDto> findAllFriends(@PathVariable(name = "user-id") int userId) {
-        return userService.findAllFriends(userId);
+    public List<UserDto> findAllFriends(@PathVariable int id) {
+        return userService.findAllFriends(id);
     }
 
     @GetMapping(pathFriend + "/common/{other-user-id}")
-    public List<UserDto> findCommonFriends(@PathVariable(name = "user-id") int userId,
+    public List<UserDto> findCommonFriends(@PathVariable int id,
                                            @PathVariable(name = "other-user-id") int otherUserId) {
-        return userService.findCommonFriends(userId, otherUserId);
+        return userService.findCommonFriends(id, otherUserId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<FeedEventDto> getFeed(@PathVariable int id) {
+        return feedService.getFeed(id);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<FilmDto> getRecommendations(@PathVariable int id) {
+        return filmService.getRecommendedFilms(id);
     }
 }
